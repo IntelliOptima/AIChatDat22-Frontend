@@ -11,7 +11,7 @@ export type Message = {
 };
 
 const Chatroom = () => {
-  const endpointUrl = "ws://10.136.139.233:8080/chat";
+  const endpointUrl = "ws://localhost:8080/chat";
   const [client, setClient] = useState<Client | null>(null);
   const [message, setMessage] = useState("");
   const [senderName, setSenderName] = useState("");
