@@ -3,13 +3,15 @@ import { useState, useEffect, useCallback } from "react";
 import { makeConnector, requestResponse, createRoute } from "../../config/RSocketConfig";
 import Logger from "../../shared/logger";
 import { DisplayMessages } from "./DisplayMessages";
+import ChatLayout from "@/layouts/ChatLayout";
+import Chat from "./Chat";
 
 export type Message = {
-    userId: number;
-    message: string;
-    chatroomId: number;
-    createdDate?: Date;
-    lastModifiedDate?: Date;
+  userId: number;
+  message: string;
+  chatroomId: number;
+  createdDate?: Date;
+  lastModifiedDate?: Date;
 
 };
 
@@ -44,7 +46,8 @@ async function main() {
           payloadsReceived++;
 
           // request 5 more payloads every 5th payload, until a max total payloads received
-          if (payloadsReceived % 2 == 0 && payloadsReceived < maxPayloads) {;
+          if (payloadsReceived % 2 == 0 && payloadsReceived < maxPayloads) {
+            ;
           } else if (payloadsReceived >= maxPayloads) {
             requester.cancel();
             setTimeout(() => {
@@ -60,7 +63,7 @@ async function main() {
           Logger.info(`requestResponse onComplete`);
           resolve(null);
         },
-        onExtension: () => {},
+        onExtension: () => { },
       }
     );
   });
@@ -68,32 +71,19 @@ async function main() {
 
 const Chatroom = () => {
   const [client, setClient] = useState<any | null>(null);
-  const [textForMessage, setTextForMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
 
-  const sendMessage = async () => {
-    await main();
-    setTextForMessage("");
-  };
+ 
 
   return (
     <div>
-
-        <div>
-          <h2>WELCOME YOU MAY START CHATTING</h2>
-          <input
-            type="text"
-            placeholder="Write a message..."
-            value={textForMessage}
-            onChange={(e) => setTextForMessage(e.target.value)}
-          />
-        </div>
-
-      {textForMessage != "" && <button onClick={sendMessage}>Send</button>}
-
+      <ChatLayout>
+        <Chat main={main}/>
+      </ChatLayout>
     </div>
+
   );
 };
 
