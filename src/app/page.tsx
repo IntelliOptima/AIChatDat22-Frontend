@@ -1,5 +1,4 @@
-import Chatroom from "@/components/chatroom/Chatroom";
-import ChatroomRSocket from "@/components/chatroom/ChatroomRSocket";
+import ChatroomRSocket from "@/components/chatroom/Chatroom";
 
 export default function Home() {
   return (

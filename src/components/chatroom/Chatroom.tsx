@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { makeConnector, requestResponse, createRoute } from "../../config/RSocketConfig2";
-import Logger from "../../shared/Logger";
-import { DisplayMessages } from "../DisplayMessages";
+import { makeConnector, requestResponse, createRoute } from "../../config/RSocketConfig";
+import Logger from "../../shared/logger";
+import { DisplayMessages } from "./DisplayMessages";
 
 export type Message = {
     userId: number;

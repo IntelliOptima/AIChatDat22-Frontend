@@ -1,4 +1,4 @@
-import { Message } from "@/components/chatroom/ChatroomRSocket";
+import { Message } from "@/components/chatroom/Chatroom";
 
 export const DisplayMessages = ({ messages }: { messages: Message[] }) => {
   return (
