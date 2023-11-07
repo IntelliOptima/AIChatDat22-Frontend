@@ -1,116 +1,97 @@
 "use client";
-
-import { useCallback, useEffect, useState } from "react";
-import { Client } from "@stomp/stompjs";
-import { DisplayMessages } from "@/components/DisplayMessages"
+import { useState, useEffect, useCallback } from "react";
+import { makeConnector, requestResponse, createRoute } from "../../config/RSocketConfig2";
+import Logger from "../../shared/Logger";
+import { DisplayMessages } from "../DisplayMessages";
 
 export type Message = {
-  senderName: string;
-  message: string;
-  time: string;
+    userId: number;
+    message: string;
+    chatroomId: number;
+    createdDate?: Date;
+    lastModifiedDate?: Date;
+
 };
 
+async function main() {
+  const connector = makeConnector();
+  const rsocket = await connector.connect();
+
+  await requestResponse(rsocket, "request-response", "Hello World!");
+
+  await requestResponse(
+    rsocket,
+    "request-response",
+    "Another request-response message!"
+    // JSON.stringify({ user: "user1", content: "a message" })
+  );
+
+  await new Promise((resolve, reject) => {
+    let payloadsReceived = 0;
+    const maxPayloads = 10;
+    const requester = rsocket.requestResponse(
+      {
+        data: Buffer.from("Hello World"),
+        metadata: createRoute("request-response"),
+      },
+      {
+        onError: (e) => reject(e),
+        onNext: (payload, isComplete) => {
+          Logger.info(
+            `[client] payload[data: ${payload.data}; metadata: ${payload.metadata}]|isComplete: ${isComplete}`
+          );
+
+          payloadsReceived++;
+
+          // request 5 more payloads every 5th payload, until a max total payloads received
+          if (payloadsReceived % 2 == 0 && payloadsReceived < maxPayloads) {;
+          } else if (payloadsReceived >= maxPayloads) {
+            requester.cancel();
+            setTimeout(() => {
+              resolve(null);
+            });
+          }
+
+          if (isComplete) {
+            resolve(null);
+          }
+        },
+        onComplete: () => {
+          Logger.info(`requestResponse onComplete`);
+          resolve(null);
+        },
+        onExtension: () => {},
+      }
+    );
+  });
+}
+
 const Chatroom = () => {
-  const endpointUrl = "ws://localhost:8080/chat";
-  const [client, setClient] = useState<Client | null>(null);
-  const [message, setMessage] = useState("");
-  const [senderName, setSenderName] = useState("");
+  const [client, setClient] = useState<any | null>(null);
+  const [textForMessage, setTextForMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
-  useEffect(() => {
-    // Unsubscribe and disconnect when the component unmounts
-    return () => {
-      if (client != null) {
-        client.deactivate();
-        setIsConnected(false);
-      }
-    };
-  }, [client]);
 
-  const handleSocketConnection = useCallback(() => {
-    const stompClient = new Client({
-      brokerURL: endpointUrl,
-
-      onConnect: () => {
-        console.log(`Connected to ${endpointUrl}`);
-        setIsConnected(true);
-
-        stompClient.subscribe("/topic/messages", (message) => {
-          console.log("THIS IS FROM SUBSCRIBE = ", message);
-
-          if (message.body) {
-            const messageBody = JSON.parse(message.body);
-            setMessages((currentMessages) => [
-              ...currentMessages,
-              {
-                senderName: messageBody.senderName,
-                message: messageBody.message,
-                time: messageBody.time,
-              },
-            ]);
-          }
-        });
-      },
-      onStompError: (frame) => {
-        console.error("STOMP error:", frame);
-      },
-    });
-
-    stompClient.activate();
-    setClient(stompClient);
-  }, []);
-
-  const sendMessage = () => {
-    const messageObject = {
-      senderName: senderName,
-      message,
-      date: new Date(),
-    };
-
-    if (client && client.connected) {
-      console.log("PUBLISHING JUST NOW");
-      client.publish({
-        destination: "/app/chat",
-        body: JSON.stringify(messageObject),
-      });
-    }
-
-    setMessage("");
+  const sendMessage = async () => {
+    await main();
+    setTextForMessage("");
   };
 
   return (
     <div>
-      <div>
-        {!isConnected && (
-          <input
-            type="text"
-            placeholder="Enter your chatroom name..."
-            value={senderName}
-            onChange={(e) => setSenderName(e.target.value)}
-          />
-        )}
 
-        {senderName !== "" && !isConnected && (
-          <button type="button" onClick={handleSocketConnection}>
-            CONNECT
-          </button>
-        )}
-      </div>
-
-      {isConnected && (
         <div>
-          <h2>WELCOME {senderName} YOU MAY START CHATTING</h2>
+          <h2>WELCOME YOU MAY START CHATTING</h2>
           <input
             type="text"
             placeholder="Write a message..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={textForMessage}
+            onChange={(e) => setTextForMessage(e.target.value)}
           />
         </div>
-      )}
 
-      {message != "" && <button onClick={sendMessage}>Send</button>}
+      {textForMessage != "" && <button onClick={sendMessage}>Send</button>}
 
       <DisplayMessages messages={messages} />
     </div>
