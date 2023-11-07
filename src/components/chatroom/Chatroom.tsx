@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect, useCallback, Dispatch, SetStateAction } from "react";
-import { makeConnector, requestResponse, createRoute } from "../../config/RSocketConfig";
+import { makeConnector, createRoute } from "../Rsocket/RSocketConnector";
 import Logger from "../../shared/logger";
 import { DisplayMessages } from "./DisplayMessages";
-import type { Message } from "../../types/Message";
-import { channelConnection } from "../../config/RSocketConfig";
+import { ChatMessage } from "../../types/Message";
+import { requestChannel } from "../Rsocket/RSocketRequests/RequestsChannel";
 
-async function main(message: Message, setMessages: Dispatch<SetStateAction<Message[]>>) {
+async function main(chatMessage: ChatMessage, setMessages: Dispatch<SetStateAction<ChatMessage[]>>) {
   const chatroomId = 1;
   const connector = makeConnector();
   const rsocket = await connector.connect();
@@ -15,7 +15,7 @@ async function main(message: Message, setMessages: Dispatch<SetStateAction<Messa
     let payloadsReceived = 0;
     const maxPayloads = 10;
     
-    channelConnection(rsocket, `chat.${chatroomId}`, message);
+    requestChannel(rsocket, `chat.${chatroomId}`, chatMessage);
 
     // const requester = rsocket.requestResponse(
     //   {
@@ -59,12 +59,12 @@ const Chatroom = () => {
   const [client, setClient] = useState<any | null>(null);
   const [chatroomId, setChatroomId] = useState<string>("1");
   const [textForMessage, setTextForMessage] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatMessage, setChatMessage] = useState<ChatMessage[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
 
   const sendMessage = async () => {
-    await main({userId: 1, message: textForMessage, chatroomId: chatroomId}, setMessages);
+    await main({userId: 1, message: textForMessage, chatroomId: chatroomId}, setChatMessage);
     setTextForMessage("");
   };
 
@@ -84,7 +84,7 @@ const Chatroom = () => {
       {textForMessage != "" && <button onClick={sendMessage}>Send</button>}
 
       <div>
-        <DisplayMessages messages={messages} />
+        <DisplayMessages messages={chatMessage} />
       </div>
 
     </div>

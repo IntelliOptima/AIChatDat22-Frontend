@@ -1,4 +1,4 @@
-export type Message = {
+export type ChatMessage = {
     userId: number;
     message: string;
     chatroomId: string;
