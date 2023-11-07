@@ -93,7 +93,6 @@ const Chatroom = () => {
 
       {textForMessage != "" && <button onClick={sendMessage}>Send</button>}
 
-      <DisplayMessages messages={messages} />
     </div>
   );
 };

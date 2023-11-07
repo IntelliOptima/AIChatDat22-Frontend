@@ -1,4 +1,4 @@
-import { Message } from "@/components/chatroom/Chatroom";
+import { Message } from "@/components/chatroom/ChatroomRSocket";
 
 export const DisplayMessages = ({ messages }: { messages: Message[] }) => {
   return (
@@ -6,7 +6,7 @@ export const DisplayMessages = ({ messages }: { messages: Message[] }) => {
       {messages.map((message, index) => (
         <div key={index}>
         <p style={{ wordWrap: "break-word" }}>
-          {message.senderName}: {message.message} ({message.time})
+          {message.userId}: {message.message}
         </p>
         </div>
       ))}
