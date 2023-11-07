@@ -3,19 +3,18 @@ import { RSocket } from "rsocket-core";
 
 import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING;
 import { ChatMessage } from "@/types/Message";
+import { sourceMapsEnabled } from "process";
+import { createRoute } from "../RSocketConnector";
 
 
-
-export const requestChannel = async (rsocket: RSocket, route: string, chatMessage: ChatMessage) => {
+export const rsocketMessageChannel = async (rsocket: RSocket, route: string, chatMessage: ChatMessage) => {
     console.log(`Executing channelConnection: ${JSON.stringify({ route, chatMessage })}`);
     
     return new Promise((resolve, reject) => {
       const requester = rsocket.requestChannel(
         {
           data: Buffer.from(JSON.stringify(chatMessage.message)),
-          metadata: encodeCompositeMetadata([
-            [MESSAGE_RSOCKET_ROUTING, encodeRoute(route)],
-          ]),
+          metadata: createRoute(route),
         },
         1,
         false,
@@ -26,8 +25,9 @@ export const requestChannel = async (rsocket: RSocket, route: string, chatMessag
               `payload[data: ${payload.data}; metadata: ${payload.metadata}]|${isComplete}`
             );
   
-            requester.request(1);
-  
+            const requesteren = requester.request(1);
+            console.log("JEG ER REGUESTER : ", requesteren);
+
             if (isComplete) {
               resolve(payload);
             }

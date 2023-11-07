@@ -17,7 +17,7 @@ import MESSAGE_RSOCKET_COMPOSITE_METADATA = WellKnownMimeType.MESSAGE_RSOCKET_CO
  *  - messages.incoming (requestStream)
  */
 
-export function makeConnector() {
+export const getRSocketConnection = async () => {
   const connectorConnectionOptions = {
     url: "ws://localhost:6565",
   };
@@ -31,10 +31,10 @@ export function makeConnector() {
       keepAlive: 10000,
     },
     transport: new WebsocketClientTransport(connectorConnectionOptions),
-  });
+  }).connect();
 }
 
-export function createRoute(route?: string) {
+export const createRoute = (route?: string) => {
   let compositeMetaData = undefined;
   if (route) {
     const encodedRoute = encodeRoute(route);

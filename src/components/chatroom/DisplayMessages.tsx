@@ -1,6 +1,6 @@
-import type { Message } from "../../types/Message";
+import type { ChatMessage } from "../../types/Message";
 
-export const DisplayMessages = ({ messages }: { messages: Message[] }) => {
+export const DisplayMessages = ({ messages }: { messages: ChatMessage[] }) => {
   return (
     <div>
       {messages.map((message, index) => (
