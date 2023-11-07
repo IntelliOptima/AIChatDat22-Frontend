@@ -1,16 +1,16 @@
 import { WellKnownMimeType, encodeCompositeMetadata, encodeRoute } from "rsocket-composite-metadata";
 import { RSocket } from "rsocket-core";
-import Logger from "../../../shared/logger";
+import Logger from "@/shared/logger";
 
 import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING;
 
 
-export async function requestResponse(rsocket: RSocket, route: string, data: string) {
-    console.log(`Executing requestResponse: ${JSON.stringify({ route, data })}`);
+export async function requestResponse(rsocket: RSocket, route: string, chatMessage: string) {
+    console.log(`Executing requestResponse: ${JSON.stringify({ route, chatMessage })}`);
     return new Promise((resolve, reject) => {
       return rsocket.requestResponse(
         {
-          data: Buffer.from(data),
+          data: Buffer.from(chatMessage),
           metadata: encodeCompositeMetadata([
             [MESSAGE_RSOCKET_ROUTING, encodeRoute(route)],
           ]),
