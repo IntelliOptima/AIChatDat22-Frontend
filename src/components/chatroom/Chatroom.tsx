@@ -1,5 +1,5 @@
 "use client";
-import { useState, Dispatch, SetStateAction, useEffect } from "react";
+import { useState, Dispatch, SetStateAction, useEffect, useRef } from "react";
 import {
   getRSocketConnection,
   createRoute,
@@ -34,12 +34,14 @@ const Chatroom = () => {
   const [textForChatMessage, setTextForMessage] = useState<string>("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const hasMounted = useRef(false);
 
   useEffect(() => {
-    if (!rsocket) {
+    if (!rsocket && !hasMounted.current) {
       const connectToRSocket = async () => {
         setRSocket(await getRSocketConnection());
         console.log("ESTABLISHING CONNECTION FOR RSOCKET!");
+        hasMounted.current = true;
       };
       connectToRSocket();
     }
@@ -53,14 +55,11 @@ const Chatroom = () => {
 
   useEffect(() => {
     if (rsocket) {
-      rsocketConnectChannel(rsocket!, `chat.${chatroomId}`);
+      rsocketConnectChannel(rsocket!, `chat.${chatroomId}`, setChatMessages);
       console.log(
         "RSOCKET DOING CONNECTION FOR CHANNEL USEEFFECT [RSOCKET != NULL]"
       );
     }
-    return () => {
-      rsocket?.close();
-    };
   }, [rsocket]);
 
   const sendMessage = async () => {
@@ -68,7 +67,9 @@ const Chatroom = () => {
       chatroomId: chatroomId,
       message: textForChatMessage,
       userId: userId,
-    });
+    }, setChatMessages);
+    
+    console.log(chatMessages);
 
     setTextForMessage("");
   };
