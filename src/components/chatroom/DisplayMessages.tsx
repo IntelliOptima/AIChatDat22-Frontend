@@ -1,4 +1,4 @@
-import { Message } from "@/components/chatroom/Chatroom";
+import type { Message } from "../../types/Message";
 
 export const DisplayMessages = ({ messages }: { messages: Message[] }) => {
   return (

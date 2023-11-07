@@ -9,6 +9,7 @@ import Logger from "../shared/logger";
 import { exit } from "process";
 import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING;
 import MESSAGE_RSOCKET_COMPOSITE_METADATA = WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA;
+import { Message } from "../types/Message";
 
 /**
  * This example assumes you have a RSocket server running on 127.0.0.1:9000 that will respond
@@ -72,6 +73,45 @@ export async function requestResponse(rsocket: RSocket, route: string, data: str
           resolve(null);
         },
         onExtension: () => {},
+      }
+    );
+  });
+}
+
+
+export const channelConnection = async (rsocket: RSocket, route: string, messages: Message) => {
+  console.log(`Executing channelConnection: ${JSON.stringify({ route, messages })}`);
+  
+  return new Promise((resolve, reject) => {
+    const requester = rsocket.requestChannel(
+      {
+        data: Buffer.from(JSON.stringify(messages.message)),
+        metadata: encodeCompositeMetadata([
+          [MESSAGE_RSOCKET_ROUTING, encodeRoute(route)],
+        ]),
+      },
+      1,
+      false,
+      {
+        onError: (e) => reject(e),
+        onNext: (payload, isComplete) => {
+          console.log(
+            `payload[data: ${payload.data}; metadata: ${payload.metadata}]|${isComplete}`
+          );
+
+          requester.request(1);
+
+          if (isComplete) {
+            resolve(payload);
+          }
+        },
+        onComplete: () => {
+          resolve(null);
+        },
+        onExtension: () => {},
+        request: (n) => {
+        },
+        cancel: () => {},
       }
     );
   });
