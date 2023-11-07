@@ -1,18 +1,18 @@
-import { Message } from "postcss";
 import { WellKnownMimeType, encodeCompositeMetadata, encodeRoute } from "rsocket-composite-metadata";
 import { RSocket } from "rsocket-core";
 
 import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING;
+import { ChatMessage } from "@/types/Message";
 
 
 
-export const requestChannel = async (rsocket: RSocket, route: string, messages: Message) => {
-    console.log(`Executing channelConnection: ${JSON.stringify({ route, messages })}`);
+export const requestChannel = async (rsocket: RSocket, route: string, chatMessage: ChatMessage) => {
+    console.log(`Executing channelConnection: ${JSON.stringify({ route, chatMessage })}`);
     
     return new Promise((resolve, reject) => {
       const requester = rsocket.requestChannel(
         {
-          data: Buffer.from(JSON.stringify(messages.message)),
+          data: Buffer.from(JSON.stringify(chatMessage.message)),
           metadata: encodeCompositeMetadata([
             [MESSAGE_RSOCKET_ROUTING, encodeRoute(route)],
           ]),

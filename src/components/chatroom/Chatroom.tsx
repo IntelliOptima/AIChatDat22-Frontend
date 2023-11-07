@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect, useCallback, Dispatch, SetStateAction } from "react";
-import { makeConnector, createRoute } from "../Rsocket/RSocketConnector";
-import Logger from "../../shared/logger";
+import { useState, Dispatch, SetStateAction } from "react";
+import { makeConnector, createRoute } from "@/components/Rsocket/RSocketConnector";
+import Logger from "@/shared/logger";
 import { DisplayMessages } from "./DisplayMessages";
-import { ChatMessage } from "../../types/Message";
-import { requestChannel } from "../Rsocket/RSocketRequests/RequestsChannel";
+import { ChatMessage } from "@/types/Message";
+import { requestChannel } from "@/components/Rsocket/RSocketRequests/RequestsChannel";
 
 async function main(chatMessage: ChatMessage, setMessages: Dispatch<SetStateAction<ChatMessage[]>>) {
   const chatroomId = 1;
