@@ -10,9 +10,9 @@ export const rsocketConnectChannel = async (rsocket: RSocket, route: string, set
     console.log(`Executing channelConnection: ${JSON.stringify({ route })}`);
     
     return new Promise((resolve, reject) => {
-      rsocket.requestChannel(
+      const connector = rsocket.requestChannel(
         {
-          data: Buffer.from(JSON.stringify("hej")),
+          data: Buffer.from(""),
           metadata: createRoute(route),
         },
         0,
@@ -22,11 +22,10 @@ export const rsocketConnectChannel = async (rsocket: RSocket, route: string, set
           onNext: (payload, isComplete) => {
             console.log(`payload[data: ${payload.data}; metadata: ${payload.metadata}]|${isComplete}`);
             setChatMessages(cur => [...cur, {
-                message: payload.data ? payload.data.toString() : "empty", 
-                userId: 1, 
-                chatroomId: "1",
-              }]);
-  
+              message: payload.data ? payload.data.toString() : "empty", 
+              userId: 1, 
+              chatroomId: "1",
+            }]);
           },
           onComplete: () => {
             resolve(null);
@@ -37,5 +36,6 @@ export const rsocketConnectChannel = async (rsocket: RSocket, route: string, set
           cancel: () => {},
         }
       );
+      connector.request(2147483647)
     });
   }

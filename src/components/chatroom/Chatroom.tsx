@@ -56,6 +56,7 @@ const Chatroom = () => {
   useEffect(() => {
     if (rsocket) {
       rsocketConnectChannel(rsocket!, `chat.${chatroomId}`, setChatMessages);
+      setIsConnected(true);
       console.log(
         "RSOCKET DOING CONNECTION FOR CHANNEL USEEFFECT [RSOCKET != NULL]"
       );
@@ -67,7 +68,7 @@ const Chatroom = () => {
       chatroomId: chatroomId,
       message: textForChatMessage,
       userId: userId,
-    }, setChatMessages);
+    });
     
     console.log(chatMessages);
 
