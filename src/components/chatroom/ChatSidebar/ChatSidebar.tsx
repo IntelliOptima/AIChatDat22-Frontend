@@ -1,6 +1,4 @@
 "use client";
-import Image from 'next/image';
-import Link from 'next/link'
 import React from 'react'
 
 type ChatSidebarProps = {
@@ -15,7 +13,9 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
         }`}
       style={{ zIndex: 0 }}
     >
+
       <div className="w-full h-full">
+
         <ul className="flex flex-col pt-10 justify-between h-2/5 text-black leading-loose">
           <a href='#' className='py-2 text-center hover:bg-gray-50 rounded-lg'><li>Chatroom 1</li></a>
           <a href='#' className='py-2 text-center hover:bg-gray-50'><li>Chatroom 2</li></a>
@@ -24,7 +24,6 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
           <a href='#' className='py-2 text-center hover:bg-gray-50'><li>Chatroom 5</li></a>
           <a href='#' className='py-2 text-center hover:bg-gray-50'><li>Chatroom 6</li></a>
         </ul>
-
         
       </div>
       <div className='flex justify-center pb-10'>

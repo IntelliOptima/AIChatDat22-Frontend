@@ -12,7 +12,12 @@ export const rsocketConnectChannel = async (rsocket: RSocket, route: string, set
     return new Promise((resolve, reject) => {
       const connector = rsocket.requestChannel(
         {
-          data: Buffer.from(""),
+          // data: Buffer.from(JSON.stringify({message: {
+          //   userId: 0,
+          //   message: "TEST",
+          //   chatroomId: "1"
+          // }})),
+          data: Buffer.from("TEST"),
           metadata: createRoute(route),
         },
         0,
