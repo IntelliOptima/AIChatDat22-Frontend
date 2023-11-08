@@ -25,6 +25,8 @@
       "@/layouts/*": ["./src/layouts/*"],
       "@/views/*": ["./src/views/*"],
       "@/hooks/*": ["./src/hooks/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/shared/*": ["./src/shared/*"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

@@ -1,99 +1,95 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import { makeConnector, requestResponse, createRoute } from "../../config/RSocketConfig";
-import Logger from "../../shared/logger";
+import { useState, Dispatch, SetStateAction, useEffect, useRef } from "react";
+import {
+  getRSocketConnection,
+  createRoute,
+} from "@/components/Rsocket/RSocketConnector";
+import Logger from "@/shared/logger";
 import { DisplayMessages } from "./DisplayMessages";
-
-export type Message = {
-    userId: number;
-    message: string;
-    chatroomId: number;
-    createdDate?: Date;
-    lastModifiedDate?: Date;
-
-};
-
-async function main() {
-  const connector = makeConnector();
-  const rsocket = await connector.connect();
-
-  await requestResponse(rsocket, "request-response", "Hello World!");
-
-  await requestResponse(
-    rsocket,
-    "request-response",
-    "Another request-response message!"
-    // JSON.stringify({ user: "user1", content: "a message" })
-  );
-
-  await new Promise((resolve, reject) => {
-    let payloadsReceived = 0;
-    const maxPayloads = 10;
-    const requester = rsocket.requestResponse(
-      {
-        data: Buffer.from("Hello World"),
-        metadata: createRoute("request-response"),
-      },
-      {
-        onError: (e) => reject(e),
-        onNext: (payload, isComplete) => {
-          Logger.info(
-            `[client] payload[data: ${payload.data}; metadata: ${payload.metadata}]|isComplete: ${isComplete}`
-          );
-
-          payloadsReceived++;
-
-          // request 5 more payloads every 5th payload, until a max total payloads received
-          if (payloadsReceived % 2 == 0 && payloadsReceived < maxPayloads) {;
-          } else if (payloadsReceived >= maxPayloads) {
-            requester.cancel();
-            setTimeout(() => {
-              resolve(null);
-            });
-          }
-
-          if (isComplete) {
-            resolve(null);
-          }
-        },
-        onComplete: () => {
-          Logger.info(`requestResponse onComplete`);
-          resolve(null);
-        },
-        onExtension: () => {},
-      }
-    );
-  });
-}
+import { rsocketConnectChannel } from "@/components/Rsocket/RSocketRequests/RSocketConnectChannel";
+import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSocketMessageChannel";
+import { RSocket } from "rsocket-core";
+import type { ChatMessage } from "@/types/Message";
+import type { Chatroom } from "@/types/Chatroom";
+import ChatLayout from "@/layouts/ChatLayout";
 
 const Chatroom = () => {
-  const [client, setClient] = useState<any | null>(null);
-  const [textForMessage, setTextForMessage] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const userId = 1; // THIS SHOULD BE A CONTEXT IN THE LONG END PLEASE!!!!!!
+
+  const [rsocket, setRSocket] = useState<RSocket | null>(null);
+  const [chatroomId, setChatroomId] = useState<string>("1");
+  const [currentChat, setCurrentChat] = useState<Chatroom | null>(null);
+  const [textForChatMessage, setTextForMessage] = useState<string>("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const hasMounted = useRef(false);
 
+  useEffect(() => {
+    if (!rsocket && !hasMounted.current) {
+      const connectToRSocket = async () => {
+        setRSocket(await getRSocketConnection());
+        console.log("ESTABLISHING CONNECTION FOR RSOCKET!");
+        hasMounted.current = true;
+      };
+      connectToRSocket();
+    }
 
+    return () => {
+      if (rsocket) {
+        rsocket.close();
+      }
+    };
+  }, [chatroomId]);
+
+  useEffect(() => {
+    if (rsocket) {
+      rsocketConnectChannel(rsocket!, `chat.${chatroomId}`, setChatMessages);
+      setIsConnected(true);
+      console.log(
+        "RSOCKET DOING CONNECTION FOR CHANNEL USEEFFECT [RSOCKET != NULL]"
+      );
+    }
+  }, [rsocket]);
+
+  
   const sendMessage = async () => {
-    await main();
+    rsocketMessageChannel(rsocket!, `chat.${chatroomId}`, {
+      chatroomId: chatroomId,
+      message: textForChatMessage,
+      userId: userId,
+    },
+    setChatMessages
+    );
+
+
     setTextForMessage("");
+    console.log("CHat Messages: ", chatMessages);
   };
+
+
 
   return (
     <div>
+    <div className='flex flex-col'>
 
-        <div>
-          <h2>WELCOME YOU MAY START CHATTING</h2>
-          <input
-            type="text"
-            placeholder="Write a message..."
-            value={textForMessage}
-            onChange={(e) => setTextForMessage(e.target.value)}
-          />
+        <div className='flex justify-center'>
+            <div className='border border-gray-200 w-3/4 h-[500px] p-2 rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6'>
+                Display Messages
+            </div>
         </div>
 
-      {textForMessage != "" && <button onClick={sendMessage}>Send</button>}
-
+        <div className='flex justify-center'>
+            <input
+                type="text"
+                placeholder="Write a message..."
+                value={textForChatMessage}
+                onChange={(e) => setTextForMessage(e.target.value)}
+                className="border border-gray-400 w-3/4 p-2 rounded-lg shadow-md text-black mr-6 bg-white"
+            />
+            {textForChatMessage != "" && <button className='text-black font-semibold hover:scale-110' onClick={sendMessage}>Send</button>}
+        </div>
     </div>
+</div>
   );
 };
 
