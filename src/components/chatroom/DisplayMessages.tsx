@@ -1,12 +1,12 @@
-import { Message } from "@/components/chatroom/Chatroom";
+import type { ChatMessage } from "../../types/Message";
 
-export const DisplayMessages = ({ messages }: { messages: Message[] }) => {
+export const DisplayMessages = ({ chatMessages }: { chatMessages: ChatMessage[] }) => {
   return (
     <div>
-      {messages.map((message, index) => (
+      {chatMessages.map((message, index) => (
         <div key={index}>
         <p style={{ wordWrap: "break-word" }}>
-          {message.userId}: {message.message}
+            {message.textMessage}
         </p>
         </div>
       ))}
