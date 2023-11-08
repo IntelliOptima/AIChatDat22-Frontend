@@ -15,7 +15,7 @@ export const rsocketRequestStream = async (
   route: string,
   setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>
 ) => {
-  console.log(`Executing channelConnection: ${JSON.stringify({ route })}`);
+  // console.log(`Executing channelConnection: ${JSON.stringify({ route })}`);
 
   return new Promise((resolve, reject) => {
     const connector = rsocket.requestStream(
@@ -30,14 +30,19 @@ export const rsocketRequestStream = async (
           console.log(
             `payload[data: ${payload.data}; metadata: ${payload.metadata}]|${isComplete}`
           );
-          setChatMessages((cur) => [
-            ...cur,
-            {
-              message: payload.data ? payload.data.toString() : "empty",
-              userId: 1,
-              chatroomId: "1",
-            },
-          ]);
+          const newMessage: ChatMessage = payload.data 
+                ? JSON.parse(payload.data.toString()) 
+                : undefined;
+          setChatMessages((curr) => {
+            // Check if the new message is already in the array
+            if (!curr.some((msg) => JSON.stringify(msg) === JSON.stringify(newMessage))) {
+              // If not, add it to the array
+              return [...curr, newMessage];
+            } else {
+              // If it is, return the current array without changes
+              return curr;
+            }
+          });
         },
         onComplete: () => {
           resolve(null);

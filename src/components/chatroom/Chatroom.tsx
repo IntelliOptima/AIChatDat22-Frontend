@@ -30,9 +30,6 @@ const Chatroom = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const hasMounted = useRef(false);
 
-  useEffect(() => {
-    console.log("MESSAGEs changeD!! : ", chatMessages);
-  }, [chatMessages]);
 
   useEffect(() => {
     if (!rsocket && !hasMounted.current) {
@@ -65,14 +62,20 @@ const Chatroom = () => {
   }, [rsocket]);
 
   const sendMessage = async () => {
-    rsocketMessageChannel(rsocket!, `chat.send.${chatroomId}`, {
-      chatroomId: chatroomId,
-      message: textForChatMessage,
+    const chatMessage: ChatMessage = {
       userId: mockedUser.id,
-    });
+      textMessage: textForChatMessage,
+      chatroomId: chatroomId,
+      createdDate: new Date(),
+      lastModifiedDate: new Date(),
+      // ... any other fields that need to be sent
+    };
 
+    console.log("CHatMessages: ", chatMessages);
+    await rsocketMessageChannel(rsocket!, `chat.send.${chatroomId}`, chatMessage);
+  
     setTextForMessage("");
-    console.log("CHat Messages: ", chatMessages);
+    
   };
 
   return (
@@ -80,7 +83,11 @@ const Chatroom = () => {
       <div className="flex flex-col">
         <div className="flex justify-center">
           <div className="border border-gray-200 w-3/4 h-[500px] p-2 rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6">
-            Display Messages
+            {chatMessages.length > 0 ? (
+              <DisplayMessages chatMessages={chatMessages} />
+            ) : (
+              <p>No Messages</p>
+            )}
           </div>
         </div>
 
