@@ -1,32 +1,27 @@
 "use client";
-import {
-  useState,
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useCallback,
-} from "react";
+
 import {
   getRSocketConnection,
-  createRoute,
+
 } from "@/components/Rsocket/RSocketConnector";
-import Logger from "@/shared/logger";
+
 import { DisplayMessages } from "./DisplayMessages";
 import { rsocketRequestStream } from "@/components/Rsocket/RSocketRequests/RSocketRequestStream";
 import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSocketFireAndForgetMessage";
 import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
-import ChatLayout from "@/layouts/ChatLayout";
 import type { User } from "@/types/User";
-import FetchData, { fetchDataStream, fetchDataSSE, streamDataAndSetListOfObjects } from "../../utility/FetchData";
+
 import { log } from "console";
+import { useEffect, useRef, useState } from "react";
+import FetchData from "../../utility/fetchData";
 
 const Chatroom = () => {
   const mockedUser: User = {
     id: 2,
     fullname: "annonymous user",
+    profileImage: "https://avatars.githubusercontent.com/u/32313915?v=4",
     email: "test@anonymous.com",
     createdDate: new Date(),
     lastModifiedDate: new Date(),
