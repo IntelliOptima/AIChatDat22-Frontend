@@ -13,19 +13,20 @@ import { log } from "console";
 import { useEffect, useRef, useState } from "react";
 import FetchData from "@/utility/FetchData";
 import { useUser } from "@/contexts/UserContext";
+import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 import { fetchData } from "next-auth/client/_utils";
 
 const Chatroom = () => {
   const { user } = useUser();
+  const {currentChatroom} = useCurrentChatroom();
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
-  const [currentChatroom, setCurrentChatroom] = useState<Chatroom | null>(null);
   const [relatedChatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [textForChatMessage, setTextForMessage] = useState<string>("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const hasMounted = useRef(false);
 
   useEffect(() => {
-    fetchData
+    FetchData.streamDataAndSetListOfObjects(`http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`, setChatrooms);
 
     if (currentChatroom) {
       FetchData.streamDataAndSetListOfObjects(
@@ -65,7 +66,7 @@ const Chatroom = () => {
     const chatMessage: ChatMessage = {
       userId: user!.id!,
       textMessage: textForChatMessage,
-      chatroomId: chatroomId,
+      chatroomId: currentChatroom!.chatroomId,
       createdDate: new Date(),
       lastModifiedDate: new Date(),
       // ... any other fields that need to be sent
@@ -74,7 +75,7 @@ const Chatroom = () => {
     console.log("CHatMessages: ", chatMessages);
     await rsocketMessageChannel(
       rsocket!,
-      `chat.send.${chatroomId}`,
+      `chat.send.${currentChatroom?.chatroomId}`,
       chatMessage
     );
 
