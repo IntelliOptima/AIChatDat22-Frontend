@@ -1,5 +1,16 @@
 "use client";
+<<<<<<< HEAD
 import { useState, useEffect, useRef } from "react";
+=======
+import {
+  useState,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
+>>>>>>> d2dc03945e24ffc7597fd7f5fc8d2a17c0e96e59
 import {
   getRSocketConnection,
 
@@ -7,15 +18,17 @@ import {
 
 import { DisplayMessages } from "./DisplayMessages";
 import { rsocketRequestStream } from "@/components/Rsocket/RSocketRequests/RSocketRequestStream";
-import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSocketMessageChannel";
+import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSocketFireAndForgetMessage";
 import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
 import type { User } from "@/types/User";
+import FetchData, { fetchDataStream, fetchDataSSE, streamDataAndSetListOfObjects } from "../../utility/FetchData";
+import { log } from "console";
 
 const Chatroom = () => {
   const mockedUser: User = {
-    id: 1,
+    id: 2,
     fullname: "annonymous user",
     email: "test@anonymous.com",
     createdDate: new Date(),
@@ -29,8 +42,12 @@ const Chatroom = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const hasMounted = useRef(false);
 
-
   useEffect(() => {
+    console.log("ITS FETCHING MSG");
+    //fetchDataStream("http://localhost:8080/api/v1/message", setChatMessages);
+
+    FetchData.streamDataAndSetListOfObjects('http://localhost:8080/api/v1/message', setChatMessages);
+
     if (!rsocket && !hasMounted.current) {
       const connectToRSocket = async () => {
         setRSocket(await getRSocketConnection());
@@ -71,17 +88,27 @@ const Chatroom = () => {
     };
 
     console.log("CHatMessages: ", chatMessages);
+<<<<<<< HEAD
     await rsocketMessageChannel(rsocket!, `chat.send.${chatroomId}`, chatMessage);
 
     setTextForMessage("");
 
+=======
+    await rsocketMessageChannel(
+      rsocket!,
+      `chat.send.${chatroomId}`,
+      chatMessage
+    );
+
+    setTextForMessage("");
+>>>>>>> d2dc03945e24ffc7597fd7f5fc8d2a17c0e96e59
   };
 
   return (
     <div>
       <div className="flex flex-col">
         <div className="flex justify-center">
-          <div className="border border-gray-200 w-3/4 h-[500px] p-2 rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6">
+          <div className="border border-gray-200 w-3/4 h-[500px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6">
             {chatMessages.length > 0 ? (
               <DisplayMessages chatMessages={chatMessages} />
             ) : (
