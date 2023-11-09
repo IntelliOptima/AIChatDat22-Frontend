@@ -1,17 +1,16 @@
 "use client";
-import { useState, Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   getRSocketConnection,
-  createRoute,
+
 } from "@/components/Rsocket/RSocketConnector";
-import Logger from "@/shared/logger";
+
 import { DisplayMessages } from "./DisplayMessages";
 import { rsocketRequestStream } from "@/components/Rsocket/RSocketRequests/RSocketRequestStream";
 import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSocketMessageChannel";
 import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
-import ChatLayout from "@/layouts/ChatLayout";
 import type { User } from "@/types/User";
 
 const Chatroom = () => {
@@ -73,9 +72,9 @@ const Chatroom = () => {
 
     console.log("CHatMessages: ", chatMessages);
     await rsocketMessageChannel(rsocket!, `chat.send.${chatroomId}`, chatMessage);
-  
+
     setTextForMessage("");
-    
+
   };
 
   return (
