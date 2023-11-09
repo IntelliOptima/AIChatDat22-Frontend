@@ -8,8 +8,6 @@ import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSoc
 import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
-
-import { log } from "console";
 import { useEffect, useRef, useState } from "react";
 import FetchData from "@/utility/FetchData";
 import { useUser } from "@/contexts/UserContext";
@@ -18,7 +16,7 @@ import { fetchData } from "next-auth/client/_utils";
 const Chatroom = () => {
   const { user } = useUser();
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
-  const [currentChatroom, setCurrentChatroom] = useState<Chatroom | null>(null);
+  const [currentChatroom, setCurrentChatroom] = useState<Chatroom | null>("48aafb29-ba0c-43d0-86da-633d7b3bd5b4");
   const [relatedChatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [textForChatMessage, setTextForMessage] = useState<string>("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -29,7 +27,7 @@ const Chatroom = () => {
 
     if (currentChatroom) {
       FetchData.streamDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/message/findByChatroomId=${currentChatroom.chatroomId}`,
+        `http://localhost:8080/api/v1/message/`,
         setChatMessages
       );
     }
@@ -54,7 +52,7 @@ const Chatroom = () => {
     if (rsocket && currentChatroom) {
       rsocketRequestStream(
         rsocket!,
-        `chat.stream.${currentChatroom.chatroomId}`,
+        `chat.stream.${currentChatroom}`,
         setChatMessages
       );      
     }
@@ -65,7 +63,7 @@ const Chatroom = () => {
     const chatMessage: ChatMessage = {
       userId: user!.id!,
       textMessage: textForChatMessage,
-      chatroomId: chatroomId,
+      chatroomId: currentChatroom,
       createdDate: new Date(),
       lastModifiedDate: new Date(),
       // ... any other fields that need to be sent
@@ -74,7 +72,7 @@ const Chatroom = () => {
     console.log("CHatMessages: ", chatMessages);
     await rsocketMessageChannel(
       rsocket!,
-      `chat.send.${chatroomId}`,
+      `chat.send.${currentChatroom}`,
       chatMessage
     );
 
