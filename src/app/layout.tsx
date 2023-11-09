@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import ChatLayout from '@/layouts/ChatLayout'
 import SessionProviders from '@/components/auth/SessionProviders'
+import { UserProvider } from '@/contexts/UserContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,7 +22,9 @@ export default function RootLayout({
 
       <body className={inter.className}>
         <SessionProviders>
+          <UserProvider>
             {children}
+          </UserProvider>
         </SessionProviders>
       </body>
     </html>

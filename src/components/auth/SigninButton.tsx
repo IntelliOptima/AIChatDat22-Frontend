@@ -1,14 +1,35 @@
 "use client";
 
 import { signIn, signOut, useSession } from 'next-auth/react';
-import React from 'react'
+import React, { useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/contexts/UserContext';
+import FetchData  from '@/utility/FetchData';
+import { fetchData } from 'next-auth/client/_utils';
+import type { User } from '@/types/User';
 
 const SigninButton = () => {
     const { data: session } = useSession();
+    const { setUser } = useUser();
     const router = useRouter();
 
+
+    useEffect(() => {
+      if (session) {
+
+        const sessionUser: User = {
+          email: session.user!.email!.toString(),
+          fullName: session.user!.name!.toString(),
+          profileImage: session.user!.image!.toString().toString()
+        }
+              FetchData.postFetch('http://localhost:8080/api/v1/user', sessionUser).then(user => {
+                console.log("Returned USER: ", user);
+                setUser(user);
+              });
+      }
+    }, [session])
+    
   
     if (session && session.user) {
         router.replace('/dashboard');
@@ -30,6 +51,8 @@ const SigninButton = () => {
     } else {
         router.replace('/');
     }
+
+
   
     return (
       <div>
