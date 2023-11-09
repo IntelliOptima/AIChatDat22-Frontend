@@ -1,5 +1,12 @@
 "use client";
-import { useState, Dispatch, SetStateAction, useEffect, useRef } from "react";
+import {
+  useState,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import {
   getRSocketConnection,
   createRoute,
@@ -34,7 +41,35 @@ const Chatroom = () => {
 
   useEffect(() => {
     console.log("ITS FETCHING MSG");
-    fetchDataStream("http://localhost:8080/api/v1/message", setChatMessages);
+    //fetchDataStream("http://localhost:8080/api/v1/message", setChatMessages);
+
+    const streamData = async () => {
+      const response = await fetch("http://localhost:8080/api/v1/message");
+      const reader = response.body.getReader();
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        const message = new TextDecoder().decode(value);
+        const messages = message.split("\n").filter(Boolean); // Split the message into lines and filter out empty lines
+
+        messages.forEach((line) => {
+          try {
+            const parsedMessage = JSON.parse(line);
+            console.log("Parsed Message:", parsedMessage);
+            setChatMessages((prevMessages) => [...prevMessages, parsedMessage]);
+          } catch (error) {
+            console.error("Error parsing JSON:", error);
+          }
+        });
+      }
+    };
+
+    streamData();
 
     if (!rsocket && !hasMounted.current) {
       const connectToRSocket = async () => {
