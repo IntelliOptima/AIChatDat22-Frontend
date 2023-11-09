@@ -69,7 +69,8 @@ const Chatroom = () => {
     }
   }, [rsocket]);
 
-  const sendMessage = async () => {
+  const sendMessage = async (e: any) => {
+    e.preventDefault();
     const chatMessage: ChatMessage = {
       userId: mockedUser.id,
       textMessage: textForChatMessage,
@@ -93,7 +94,7 @@ const Chatroom = () => {
     <div>
       <div className="flex flex-col">
         <div className="flex justify-center">
-          <div className="border border-gray-200 w-3/4 h-[500px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6">
+          <div className="border border-gray-200 w-3/4 h-[500px] p-2 rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
             {chatMessages.length > 0 ? (
               <DisplayMessages chatMessages={chatMessages} />
             ) : (
@@ -102,23 +103,24 @@ const Chatroom = () => {
           </div>
         </div>
 
-        <div className="flex justify-center">
+        
+          <form onSubmit={sendMessage}>
+          <div className="flex justify-center">
           <input
             type="text"
             placeholder="Write a message..."
             value={textForChatMessage}
             onChange={(e) => setTextForMessage(e.target.value)}
             className="border border-gray-400 w-3/4 p-2 rounded-lg shadow-md text-black mr-6 bg-white"
-          />
+            />
           {textForChatMessage != "" && (
-            <button
-              className="text-black font-semibold hover:scale-110"
-              onClick={sendMessage}
-            >
+            <button type="submit" className="text-black font-semibold hover:scale-110">
               Send
             </button>
           )}
-        </div>
+          </div>
+          </form>
+        
       </div>
     </div>
   );
