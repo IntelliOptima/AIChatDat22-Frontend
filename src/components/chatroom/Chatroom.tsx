@@ -13,7 +13,6 @@ import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
 import type { User } from "@/types/User";
 
-import { log } from "console";
 import { useEffect, useRef, useState } from "react";
 import FetchData from "../../utility/fetchData";
 
