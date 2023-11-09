@@ -42,7 +42,6 @@ abstract class FetchData {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add any other headers as needed
         },
         body: JSON.stringify(data), // Convert data to JSON string
       });
@@ -50,7 +49,7 @@ abstract class FetchData {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
+      console.log("RESPONSE: ", response);
       const responseData = await response.json(); // Assuming the response is JSON
       return responseData;
     } catch (error) {
