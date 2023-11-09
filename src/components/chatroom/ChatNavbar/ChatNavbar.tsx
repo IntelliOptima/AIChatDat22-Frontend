@@ -1,5 +1,6 @@
 "use client";
 
+import SigninButton from '@/components/auth/SigninButton';
 import Image from 'next/image'
 import React from 'react'
 
@@ -23,6 +24,10 @@ const ChatNavbar = ({ openSidebar } : ChatNavbarProps) => {
                 className="cursor-pointer hover:scale-105"
                 />
                 </div>
+            </div>
+
+            <div>
+                <SigninButton />
             </div>
         </nav >
     )
