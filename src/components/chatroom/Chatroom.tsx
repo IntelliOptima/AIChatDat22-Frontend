@@ -1,16 +1,5 @@
 "use client";
-<<<<<<< HEAD
-import { useState, useEffect, useRef } from "react";
-=======
-import {
-  useState,
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useCallback,
-} from "react";
->>>>>>> d2dc03945e24ffc7597fd7f5fc8d2a17c0e96e59
+
 import {
   getRSocketConnection,
 
@@ -23,13 +12,16 @@ import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
 import type { User } from "@/types/User";
-import FetchData, { fetchDataStream, fetchDataSSE, streamDataAndSetListOfObjects } from "../../utility/FetchData";
+
 import { log } from "console";
+import { useEffect, useRef, useState } from "react";
+import FetchData from "../../utility/fetchData";
 
 const Chatroom = () => {
   const mockedUser: User = {
     id: 2,
     fullname: "annonymous user",
+    profileImage: "https://avatars.githubusercontent.com/u/32313915?v=4",
     email: "test@anonymous.com",
     createdDate: new Date(),
     lastModifiedDate: new Date(),
@@ -88,12 +80,6 @@ const Chatroom = () => {
     };
 
     console.log("CHatMessages: ", chatMessages);
-<<<<<<< HEAD
-    await rsocketMessageChannel(rsocket!, `chat.send.${chatroomId}`, chatMessage);
-
-    setTextForMessage("");
-
-=======
     await rsocketMessageChannel(
       rsocket!,
       `chat.send.${chatroomId}`,
@@ -101,7 +87,6 @@ const Chatroom = () => {
     );
 
     setTextForMessage("");
->>>>>>> d2dc03945e24ffc7597fd7f5fc8d2a17c0e96e59
   };
 
   return (
