@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  getRSocketConnection,
-
-} from "@/components/Rsocket/RSocketConnector";
+import { getRSocketConnection } from "@/components/Rsocket/RSocketConnector";
 
 import { DisplayMessages } from "./DisplayMessages";
 import { rsocketRequestStream } from "@/components/Rsocket/RSocketRequests/RSocketRequestStream";
@@ -11,34 +8,31 @@ import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSoc
 import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
-import type { User } from "@/types/User";
 
 import { log } from "console";
 import { useEffect, useRef, useState } from "react";
-import FetchData from "../../utility/fetchData";
+import FetchData from "@/utility/FetchData";
+import { useUser } from "@/contexts/UserContext";
+import { fetchData } from "next-auth/client/_utils";
 
 const Chatroom = () => {
-  const mockedUser: User = {
-    id: 2,
-    fullname: "annonymous user",
-    profileImage: "https://avatars.githubusercontent.com/u/32313915?v=4",
-    email: "test@anonymous.com",
-    createdDate: new Date(),
-    lastModifiedDate: new Date(),
-    version: 1,
-  }; // THIS SHOULD BE A CONTEXT IN THE LONG END PLEASE!!!!!!
-
+  const { user } = useUser();
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
-  const [chatroomId, setChatroomId] = useState<string>("1");
+  const [currentChatroom, setCurrentChatroom] = useState<Chatroom | null>(null);
+  const [relatedChatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [textForChatMessage, setTextForMessage] = useState<string>("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const hasMounted = useRef(false);
 
   useEffect(() => {
-    console.log("ITS FETCHING MSG");
-    //fetchDataStream("http://localhost:8080/api/v1/message", setChatMessages);
+    fetchData
 
-    FetchData.streamDataAndSetListOfObjects('http://localhost:8080/api/v1/message', setChatMessages);
+    if (currentChatroom) {
+      FetchData.streamDataAndSetListOfObjects(
+        `http://localhost:8080/api/v1/message/findByChatroomId=${currentChatroom.chatroomId}`,
+        setChatMessages
+      );
+    }
 
     if (!rsocket && !hasMounted.current) {
       const connectToRSocket = async () => {
@@ -54,25 +48,22 @@ const Chatroom = () => {
         rsocket.close();
       }
     };
-  }, [chatroomId]);
+  }, [currentChatroom]);
 
   useEffect(() => {
-    if (rsocket) {
+    if (rsocket && currentChatroom) {
       rsocketRequestStream(
         rsocket!,
-        `chat.stream.${chatroomId}`,
+        `chat.stream.${currentChatroom.chatroomId}`,
         setChatMessages
-      );
-      console.log(
-        "RSOCKET DOING CONNECTION FOR CHANNEL USEEFFECT [RSOCKET != NULL]"
-      );
+      );      
     }
   }, [rsocket]);
 
   const sendMessage = async (e: any) => {
     e.preventDefault();
     const chatMessage: ChatMessage = {
-      userId: mockedUser.id,
+      userId: user!.id!,
       textMessage: textForChatMessage,
       chatroomId: chatroomId,
       createdDate: new Date(),

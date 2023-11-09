@@ -36,13 +36,12 @@ abstract class FetchData {
     }
   };
 
-  static postFetch = async (url: string, data: Object) => {
+  static postFetch = async <T> (url: string, data: T) => {
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add any other headers as needed
         },
         body: JSON.stringify(data), // Convert data to JSON string
       });
@@ -50,15 +49,13 @@ abstract class FetchData {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
-      const responseData = await response.json(); // Assuming the response is JSON
-      return responseData;
+      console.log("RESPONSE: ", response);
+      return await response.json() as T; // Assuming the response is JSON
     } catch (error) {
       console.error('Error:', error);
       throw error; // Rethrow the error for further handling if needed
     }
   };
-
 }
 
 export default FetchData;
