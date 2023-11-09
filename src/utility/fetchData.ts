@@ -2,9 +2,9 @@ import { Dispatch, SetStateAction } from "react";
 
 abstract class FetchData {
 
-  static streamDataAndSetListOfObjects = async <T extends any[]>(
+  static streamDataAndSetListOfObjects = async <T> (
     url: string,
-    setDataObject: Dispatch<SetStateAction<T>>
+    setDataObject: Dispatch<SetStateAction<T[]>>
   ) => {
     const response = await fetch(url);
     if (!response.body) {
@@ -26,9 +26,9 @@ abstract class FetchData {
   
       messages.forEach((line) => {
         try {
-          const parsedObject = JSON.parse(line);
-          console.log("Parsed Message:", parsedObject as T);
-          setDataObject((prevState) => [...prevState, parsedObject]);
+          const parsedObject = JSON.parse(line) as T;
+          console.log("Parsed Message:", parsedObject);
+          setDataObject((prevState: T[]) => [...prevState, parsedObject]);
         } catch (error) {
           console.error("Error parsing JSON:", error);
         }
@@ -36,9 +36,28 @@ abstract class FetchData {
     }
   };
 
-  static postFetch = async () => {
+  static postFetch = async (url: string, data: Object) => {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any other headers as needed
+        },
+        body: JSON.stringify(data), // Convert data to JSON string
+      });
 
-  } 
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const responseData = await response.json(); // Assuming the response is JSON
+      return responseData;
+    } catch (error) {
+      console.error('Error:', error);
+      throw error; // Rethrow the error for further handling if needed
+    }
+  };
 
 }
 
