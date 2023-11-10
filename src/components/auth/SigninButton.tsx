@@ -5,36 +5,29 @@ import React, { useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
+import type { User } from '@/types/User';
+import FetchData from '@/utility/fetchData';
 
 const SigninButton = () => {
     const { data: session } = useSession();
     const { setUser } = useUser();
     const router = useRouter();
 
-    const fetchUser = async () => {
-        if (session) {
-             const response = await fetch('http://localhost:8080/api/v1/user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }, 
-                body: JSON.stringify({
-                    email: session.user?.email,
-                    name: session.user?.name,
-                    profileImage: session.user?.image
-                    })
-
-                   
-            });
-            const user = response.json();
-            setUser(await user);
-        }
-    }
-
 
     useEffect(() => {
-        fetchUser();
-    }, [])
+      if (session) {
+
+        const sessionUser: User = {
+          email: session.user!.email!.toString(),
+          fullName: session.user!.name!.toString(),
+          profileImage: session.user!.image!.toString().toString()
+        }
+              FetchData.postFetch('http://localhost:8080/api/v1/user', sessionUser).then(user => {
+                console.log("Returned USER: ", user);
+                setUser(user);
+              });
+      }
+    }, [session])
     
   
     if (session && session.user) {
