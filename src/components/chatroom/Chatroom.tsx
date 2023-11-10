@@ -8,10 +8,8 @@ import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSoc
 import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
-
-import { log } from "console";
 import { useEffect, useRef, useState } from "react";
-import FetchData from "@/utility/FetchData";
+import FetchData from "@/utility/fetchData";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 import { fetchData } from "next-auth/client/_utils";
@@ -30,7 +28,7 @@ const Chatroom = () => {
 
     if (currentChatroom) {
       FetchData.streamDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/message/findByChatroomId=${currentChatroom.chatroomId}`,
+        `http://localhost:8080/api/v1/message/`,
         setChatMessages
       );
     }
@@ -55,7 +53,7 @@ const Chatroom = () => {
     if (rsocket && currentChatroom) {
       rsocketRequestStream(
         rsocket!,
-        `chat.stream.${currentChatroom.chatroomId}`,
+        `chat.stream.${currentChatroom}`,
         setChatMessages
       );      
     }
