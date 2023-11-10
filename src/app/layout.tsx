@@ -4,6 +4,7 @@ import './globals.css'
 import ChatLayout from '@/layouts/ChatLayout'
 import SessionProviders from '@/components/auth/SessionProviders'
 import { UserProvider } from '@/contexts/UserContext'
+import { ChatroomProvider } from '@/contexts/ChatroomContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,7 +24,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <SessionProviders>
           <UserProvider>
-            {children}
+            <ChatroomProvider>
+              {children}
+            </ChatroomProvider>
           </UserProvider>
         </SessionProviders>
       </body>

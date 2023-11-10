@@ -1,3 +1,4 @@
+import { Chatroom } from "@/types/Chatroom";
 import { Dispatch, SetStateAction } from "react";
 
 abstract class FetchData {
@@ -51,6 +52,26 @@ abstract class FetchData {
       }
       console.log("RESPONSE: ", response);
       return await response.json() as T; // Assuming the response is JSON
+    } catch (error) {
+      console.error('Error:', error);
+      throw error; // Rethrow the error for further handling if needed
+    }
+  };
+
+  static postCreateChatroom = async (url: string) => {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      console.log("RESPONSE: ", response);
+      return await response.json() as Chatroom; // Assuming the response is JSON
     } catch (error) {
       console.error('Error:', error);
       throw error; // Rethrow the error for further handling if needed
