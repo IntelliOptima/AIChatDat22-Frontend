@@ -1,11 +1,16 @@
 "use client";
 import React from 'react'
+import FetchData from '@/utility/FetchData';
+import { useUser } from '@/contexts/UserContext';
+import { useCurrentChatroom } from '@/contexts/ChatroomContext'
 
 type ChatSidebarProps = {
   sidebarOpen: boolean;
 };
 
 const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
+  const { user } = useUser();
+  const {setCurrentChatroom } = useCurrentChatroom();
   return (
     <div
       className={`fixed top-0 bottom-0 left-0 w-[220px] bg-white border-r-2 py-12 
@@ -27,7 +32,11 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
         
       </div>
       <div className='flex justify-center pb-10'>
-          <a href='#' className='text-black text-center w-full hover:scale-110'> + Create new chat</a>
+          <a href='#' className='text-black text-center w-full hover:scale-110' 
+          onClick={() => FetchData.postCreateChatroom(`http://localhost:8080/api/v1/chatroom/${user?.id}`)
+          .then(response => setCurrentChatroom(response))}>
+             + Create new chat
+             </a>
         </div>
 
     </div>
