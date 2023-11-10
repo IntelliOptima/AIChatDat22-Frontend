@@ -5,9 +5,8 @@ import React, { useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
-import FetchData  from '@/utility/FetchData';
-import { fetchData } from 'next-auth/client/_utils';
 import type { User } from '@/types/User';
+import FetchData from '@/utility/fetchData';
 
 const SigninButton = () => {
     const { data: session } = useSession();
