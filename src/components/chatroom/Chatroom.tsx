@@ -18,7 +18,8 @@ import { fetchData } from "next-auth/client/_utils";
 
 const Chatroom = () => {
   const { user } = useUser();
-  const {currentChatroom} = useCurrentChatroom();
+  //const {currentChatroom, setCurrentChatroom} = useCurrentChatroom();
+  const [currentChatroom, setCurrentChatroom] = useState<string | null>("48aafb29-ba0c-43d0-86da-633d7b3bd5b4");
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
   const [relatedChatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [textForChatMessage, setTextForMessage] = useState<string>("");
@@ -26,19 +27,28 @@ const Chatroom = () => {
   const hasMounted = useRef(false);
 
   useEffect(() => {
-    FetchData.streamDataAndSetListOfObjects(`http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`, setChatrooms);
+   // FetchData.streamDataAndSetListOfObjects(`http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`, setChatrooms);
+
+    // if (currentChatroom) {
+    //   console.log("CUR CHATROOM: ", currentChatroom);
+
+    //   FetchData.streamDataAndSetListOfObjects(
+    //     `http://localhost:8080/api/v1/message/findByChatroomId=${currentChatroom.id}`,
+    //     setChatMessages
+    //   );
+
+    // }
 
     if (currentChatroom) {
-      FetchData.streamDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/message/findByChatroomId=${currentChatroom.chatroomId}`,
+      FetchData.streamDataAndSetListOfObjects(        
+        `http://localhost:8080/api/v1/message/`,
         setChatMessages
       );
     }
 
     if (!rsocket && !hasMounted.current) {
       const connectToRSocket = async () => {
-        setRSocket(await getRSocketConnection());
-        console.log("ESTABLISHING CONNECTION FOR RSOCKET!");
+        setRSocket(await getRSocketConnection());        
         hasMounted.current = true;
       };
       connectToRSocket();
@@ -55,27 +65,27 @@ const Chatroom = () => {
     if (rsocket && currentChatroom) {
       rsocketRequestStream(
         rsocket!,
-        `chat.stream.${currentChatroom.chatroomId}`,
+        `chat.stream.${currentChatroom}`,
         setChatMessages
       );      
     }
   }, [rsocket]);
+
 
   const sendMessage = async (e: any) => {
     e.preventDefault();
     const chatMessage: ChatMessage = {
       userId: user!.id!,
       textMessage: textForChatMessage,
-      chatroomId: currentChatroom!.chatroomId,
+      chatroomId: currentChatroom!,
       createdDate: new Date(),
       lastModifiedDate: new Date(),
       // ... any other fields that need to be sent
     };
 
-    console.log("CHatMessages: ", chatMessages);
     await rsocketMessageChannel(
       rsocket!,
-      `chat.send.${currentChatroom?.chatroomId}`,
+      `chat.send.${currentChatroom!}`,
       chatMessage
     );
 

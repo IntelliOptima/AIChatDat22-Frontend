@@ -16,23 +16,30 @@ const SigninButton = () => {
 
 
     useEffect(() => {
-      if (session) {
-
-        const sessionUser: User = {
-          email: session.user!.email!.toString(),
-          fullName: session.user!.name!.toString(),
-          profileImage: session.user!.image!.toString().toString()
+      const updateUser = async () => {
+        if (session) {
+          const sessionUser: User = {
+            email: session.user!.email!.toString(),
+            fullName: session.user!.name!.toString(),
+            profileImage: session.user!.image!.toString().toString(),
+          };
+  
+          try {
+            const user = await FetchData.postFetch('http://localhost:8080/api/v1/user', sessionUser);
+            console.log("Returned USER: ", user);
+            setUser(user);
+            router.replace('/dashboard');
+          } catch (error) {
+            console.error('Error updating user:', error);
+          }
         }
-              FetchData.postFetch('http://localhost:8080/api/v1/user', sessionUser).then(user => {
-                console.log("Returned USER: ", user);
-                setUser(user);
-              });
-      }
-    }, [session])
+      };
+  
+      updateUser();
+    }, [session, setUser, router]);
     
   
-    if (session && session.user) {
-        router.replace('/dashboard');
+    if (session && session.user) {        
       return (
         <div className="flex gap-4 ml-auto items-center">
           <Image
