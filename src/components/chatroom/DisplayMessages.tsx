@@ -4,8 +4,6 @@ import Image from 'next/image'
 
 export const DisplayMessages = ({ chatMessages }: { chatMessages: ChatMessage[] }) => {
 
-
-
   const user = useUser();
 
   return (
