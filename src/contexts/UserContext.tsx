@@ -1,16 +1,20 @@
 "use client";
 
+import React, { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 import { User } from '@/types/User';
-import React, { createContext, useContext, ReactNode, useState, Dispatch, SetStateAction } from 'react';
-
 
 type UserContextType = {
   user: User | undefined;
   setUser: Dispatch<SetStateAction<User | undefined>>;
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+// Provide a full default value for the context
+const defaultContextValue: UserContextType = {
+  user: undefined,
+  setUser: () => {} // No-op function
+};
 
+const UserContext = createContext<UserContextType>(defaultContextValue);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | undefined>(undefined);
@@ -24,7 +28,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
 export function useUser() {
   const context = useContext(UserContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useUser must be used within a UserProvider');
   }
   return context;
