@@ -33,8 +33,9 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
       </div>
       <div className='flex justify-center pb-10'>
           <a href='#' className='text-black text-center w-full hover:scale-110' 
-          onClick={() => FetchData.postCreateChatroom(`http://localhost:8080/api/v1/chatroom/${user?.id}`)
-          .then(response => setCurrentChatroom(response))}>
+          onClick={
+            () => FetchData.postCreateChatroom(`http://localhost:8080/api/v1/chatroom/${user?.id}`, setCurrentChatroom)
+          }>
              + Create new chat
              </a>
         </div>

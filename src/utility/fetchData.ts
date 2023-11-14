@@ -1,11 +1,13 @@
+import Logger from "@/shared/logger";
 import { Chatroom } from "@/types/Chatroom";
+import { log } from "console";
 import { Dispatch, SetStateAction } from "react";
 
 abstract class FetchData {
 
-  static streamDataAndSetListOfObjects = async <T> (
+  static streamDataAndSetListOfRecords = async <T> (
     url: string,
-    setDataObject: Dispatch<SetStateAction<T[]>>
+    setDataRecord: Dispatch<SetStateAction<T[]>>,
   ) => {
     const response = await fetch(url);
     if (!response.body) {
@@ -17,25 +19,40 @@ abstract class FetchData {
   
     while (true) {
       const { done, value } = await reader.read();
-  
+
       if (done) {
         break;
       }
   
-      const message = new TextDecoder().decode(value);
-      const messages = message.split("\n").filter(Boolean);
+      const object = new TextDecoder().decode(value);
+      const objects = object.split("\n").filter(Boolean);
   
-      messages.forEach((line) => {
+      objects.forEach((line) => {
         try {
-          const parsedObject = JSON.parse(line) as T;
-          console.log("Parsed Message:", parsedObject);
-          setDataObject((prevState: T[]) => [...prevState, parsedObject]);
+          const parsedRecord = JSON.parse(line) as T;
+          console.log("PARSED OBJECT:", parsedRecord);
+          setDataRecord((prevState: T[]) => [...prevState, parsedRecord]);          
         } catch (error) {
           console.error("Error parsing JSON:", error);
         }
       });
     }
   };
+
+  static fetchDataAndSetListOfObjects = async <T> (url: string, setDataObject: Dispatch<SetStateAction<T[]>>) => {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      Logger.info("response body is NULL - returning from fetchDataAndSetListofObjects");
+      return;
+    }
+
+    const data = await response.json();
+    console.log("THIS IS DATA: ", data);
+
+    setDataObject(data);
+    
+  }
 
   static postFetch = async <T> (url: string, data: T) => {
     try {
@@ -58,7 +75,7 @@ abstract class FetchData {
     }
   };
 
-  static postCreateChatroom = async (url: string) => {
+  static postCreateChatroom = async (url: string, setCurrentChatroom: Dispatch<SetStateAction<Chatroom | undefined>>) => {
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -71,7 +88,7 @@ abstract class FetchData {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       console.log("RESPONSE: ", response);
-      return await response.json() as Chatroom; // Assuming the response is JSON
+      setCurrentChatroom(await response.json() as Chatroom);
     } catch (error) {
       console.error('Error:', error);
       throw error; // Rethrow the error for further handling if needed
