@@ -1,11 +1,13 @@
+import Logger from "@/shared/logger";
 import { Chatroom } from "@/types/Chatroom";
+import { log } from "console";
 import { Dispatch, SetStateAction } from "react";
 
 abstract class FetchData {
 
-  static streamDataAndSetListOfObjects = async <T> (
+  static streamDataAndSetListOfRecords = async <T> (
     url: string,
-    setDataObject: Dispatch<SetStateAction<T[]>>,
+    setDataRecord: Dispatch<SetStateAction<T[]>>,
   ) => {
     const response = await fetch(url);
     if (!response.body) {
@@ -27,15 +29,30 @@ abstract class FetchData {
   
       objects.forEach((line) => {
         try {
-          const parsedObject = JSON.parse(line) as T;
-          console.log("PARSED OBJECT:", parsedObject);
-          setDataObject((prevState: T[]) => [...prevState, parsedObject]);          
+          const parsedRecord = JSON.parse(line) as T;
+          console.log("PARSED OBJECT:", parsedRecord);
+          setDataRecord((prevState: T[]) => [...prevState, parsedRecord]);          
         } catch (error) {
           console.error("Error parsing JSON:", error);
         }
       });
     }
   };
+
+  static fetchDataAndSetListOfObjects = async <T> (url: string, setDataObject: Dispatch<SetStateAction<T[]>>) => {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      Logger.info("response body is NULL - returning from fetchDataAndSetListofObjects");
+      return;
+    }
+
+    const data = await response.json();
+    console.log("THIS IS DATA: ", data);
+
+    setDataObject(data);
+    
+  }
 
   static postFetch = async <T> (url: string, data: T) => {
     try {

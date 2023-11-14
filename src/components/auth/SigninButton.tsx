@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
 import type { User } from '@/types/User';
-import FetchData from '@/utility/fetchData';
+import FetchData from '@/utility/FetchData';
 
 const SigninButton = () => {
     const { data: session } = useSession();
@@ -20,12 +20,11 @@ const SigninButton = () => {
           const sessionUser: User = {
             email: session.user!.email!.toString(),
             fullName: session.user!.name!.toString(),
-            profileImage: session.user!.image!.toString().toString(),
+            profileImage: session.user!.image!.toString(),
           };
   
           try {
             const user = await FetchData.postFetch('http://localhost:8080/api/v1/user', sessionUser);
-            console.log("Returned USER: ", user);
             setUser(user);
             router.replace('/dashboard');
           } catch (error) {
@@ -35,7 +34,7 @@ const SigninButton = () => {
       };
   
       updateUser();
-    }, [session, setUser, router]);
+    }, [session]);
     
   
     if (session && session.user) {        
