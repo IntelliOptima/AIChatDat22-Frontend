@@ -1,98 +1,133 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import { makeConnector, requestResponse, createRoute } from "../../config/RSocketConfig2";
-import Logger from "../../shared/Logger";
-import { DisplayMessages } from "../DisplayMessages";
 
-export type Message = {
-    userId: number;
-    message: string;
-    chatroomId: number;
-    createdDate?: Date;
-    lastModifiedDate?: Date;
+import { getRSocketConnection } from "@/components/Rsocket/RSocketConnector";
 
-};
-
-async function main() {
-  const connector = makeConnector();
-  const rsocket = await connector.connect();
-
-  await requestResponse(rsocket, "request-response", "Hello World!");
-
-  await requestResponse(
-    rsocket,
-    "request-response",
-    "Another request-response message!"
-    // JSON.stringify({ user: "user1", content: "a message" })
-  );
-
-  await new Promise((resolve, reject) => {
-    let payloadsReceived = 0;
-    const maxPayloads = 10;
-    const requester = rsocket.requestResponse(
-      {
-        data: Buffer.from("Hello World"),
-        metadata: createRoute("request-response"),
-      },
-      {
-        onError: (e) => reject(e),
-        onNext: (payload, isComplete) => {
-          Logger.info(
-            `[client] payload[data: ${payload.data}; metadata: ${payload.metadata}]|isComplete: ${isComplete}`
-          );
-
-          payloadsReceived++;
-
-          // request 5 more payloads every 5th payload, until a max total payloads received
-          if (payloadsReceived % 2 == 0 && payloadsReceived < maxPayloads) {;
-          } else if (payloadsReceived >= maxPayloads) {
-            requester.cancel();
-            setTimeout(() => {
-              resolve(null);
-            });
-          }
-
-          if (isComplete) {
-            resolve(null);
-          }
-        },
-        onComplete: () => {
-          Logger.info(`requestResponse onComplete`);
-          resolve(null);
-        },
-        onExtension: () => {},
-      }
-    );
-  });
-}
+import { DisplayMessages } from "./DisplayMessages";
+import { rsocketRequestStream } from "@/components/Rsocket/RSocketRequests/RSocketRequestStream";
+import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSocketFireAndForgetMessage";
+import { RSocket } from "rsocket-core";
+import type { ChatMessage } from "@/types/Message";
+import type { Chatroom } from "@/types/Chatroom";
+import { useEffect, useRef, useState } from "react";
+import { useUser } from "@/contexts/UserContext";
+import { useCurrentChatroom } from "@/contexts/ChatroomContext";
+import FetchData from "@/utility/fetchData";
 
 const Chatroom = () => {
-  const [client, setClient] = useState<any | null>(null);
-  const [textForMessage, setTextForMessage] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const { user } = useUser();
+  const { currentChatroom, allChatrooms, setCurrentChatroom, setAllChatrooms } = useCurrentChatroom();
+  const [rsocket, setRSocket] = useState<RSocket | null>(null);
+  const [textForChatMessage, setTextForMessage] = useState<string>("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const hasMounted = useRef(false);
 
+  useEffect(() => {
+    if (allChatrooms.length === 0) {
+      FetchData.fetchDataAndSetListOfObjects(
+        `${process.env.NEXT_PUBLIC_FETCH_ALL_CHATROOMS}${user?.id}`,
+        setAllChatrooms
+      );
+    }
 
-  const sendMessage = async () => {
-    await main();
+    if (localStorage.getItem('currentChatroom')) {
+      setCurrentChatroom(JSON.parse(localStorage.getItem('currentChatroom')!));
+    }
+
+  }, [allChatrooms, user]);
+
+  useEffect(() => {
+    
+    if (allChatrooms.length > 0) {
+      if (currentChatroom === undefined) {
+        setCurrentChatroom(allChatrooms[0]);     
+      }
+      FetchData.fetchDataAndSetListOfObjects(
+        `${process.env.NEXT_PUBLIC_FETCH_MESSAGES}${currentChatroom?.id !== undefined ? currentChatroom?.id : allChatrooms[0].id}`,
+        setChatMessages
+      );
+    }
+  }, [allChatrooms, currentChatroom]);
+
+  useEffect(() => {
+
+    if (!rsocket && !hasMounted.current) {
+      const connectToRSocket = async () => {
+        setRSocket(await getRSocketConnection());
+        hasMounted.current = true;
+      };
+      connectToRSocket();
+    }    
+
+    if (rsocket && currentChatroom?.id !== undefined) {
+      console.log("RSOCKET CUR CHATROOM", currentChatroom);
+
+      rsocketRequestStream(
+        rsocket!,
+        `chat.stream.${currentChatroom.id}`,
+        setChatMessages
+      );
+    }
+
+    // return () => {
+    //   if (rsocket) {
+    //     rsocket.close();
+    //   }
+    // };
+
+  }, [rsocket, currentChatroom]);
+
+  const sendMessage = async (e: any) => {
+    e.preventDefault();
+    const chatMessage: ChatMessage = {
+      userId: user!.id!,
+      textMessage: textForChatMessage,
+      chatroomId: currentChatroom?.id!,
+      createdDate: new Date(),
+      lastModifiedDate: new Date()
+    };
+    
+    await rsocketMessageChannel(
+      rsocket!,
+      `chat.send.${currentChatroom?.id}`,
+      chatMessage
+    );
+
     setTextForMessage("");
   };
 
   return (
     <div>
-
-        <div>
-          <h2>WELCOME YOU MAY START CHATTING</h2>
-          <input
-            type="text"
-            placeholder="Write a message..."
-            value={textForMessage}
-            onChange={(e) => setTextForMessage(e.target.value)}
-          />
+      <div className="flex flex-col">
+        <div className="flex justify-center">          
+          <div className="border border-gray-200 w-3/4 h-[500px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
+            {chatMessages.length > 0 ? (
+              <DisplayMessages chatMessages={chatMessages} />
+            ) : (
+              <p>No Messages</p>
+            )}
+          </div>
         </div>
 
-      {textForMessage != "" && <button onClick={sendMessage}>Send</button>}
-
+        <form onSubmit={sendMessage}>
+          <div className="flex justify-center">
+            <input
+              type="text"
+              placeholder="Write a message..."
+              value={textForChatMessage}
+              onChange={(e) => setTextForMessage(e.target.value)}
+              className="border border-gray-400 w-3/4 p-2 rounded-lg shadow-md text-black mr-6 bg-white"
+            />
+            {textForChatMessage != "" && (
+              <button
+                type="submit"
+                className="text-black font-semibold hover:scale-110"
+              >
+                Send
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -11,9 +11,11 @@
   "dependencies": {
     "@stomp/stompjs": "^7.0.0",
     "next": "14.0.1",
+    "next-auth": "^4.24.4",
     "punycode": "^2.3.1",
     "react": "^18.2.0",
     "react-dom": "^18",
+    "react-fetch-streams": "^1.1.2",
     "rsocket-adapter-rxjs": "^1.0.0-alpha.4",
     "rsocket-composite-metadata": "^1.0.0-alpha.3",
     "rsocket-core": "^1.0.0-alpha.3",

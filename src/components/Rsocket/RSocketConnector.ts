@@ -5,7 +5,6 @@ import {
   encodeRoute,
   WellKnownMimeType,
 } from "rsocket-composite-metadata";
-import Logger from "../shared/logger";
 import { exit } from "process";
 import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING;
 import MESSAGE_RSOCKET_COMPOSITE_METADATA = WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA;
@@ -18,9 +17,9 @@ import MESSAGE_RSOCKET_COMPOSITE_METADATA = WellKnownMimeType.MESSAGE_RSOCKET_CO
  *  - messages.incoming (requestStream)
  */
 
-export function makeConnector() {
+export const getRSocketConnection = async () => {
   const connectorConnectionOptions = {
-    url: "ws://localhost:6565",
+    url: process.env.NEXT_PUBLIC_RSOCKET_CONNECTOR!
   };
   console.log(
     `Creating connector to ${JSON.stringify(connectorConnectionOptions)}`
@@ -32,10 +31,10 @@ export function makeConnector() {
       keepAlive: 10000,
     },
     transport: new WebsocketClientTransport(connectorConnectionOptions),
-  });
+  }).connect();
 }
 
-export function createRoute(route?: string) {
+export const createRoute = (route?: string) => {
   let compositeMetaData = undefined;
   if (route) {
     const encodedRoute = encodeRoute(route);
@@ -46,34 +45,3 @@ export function createRoute(route?: string) {
   }
   return compositeMetaData;
 }
-
-export async function requestResponse(rsocket: RSocket, route: string, data: string) {
-  console.log(`Executing requestResponse: ${JSON.stringify({ route, data })}`);
-  return new Promise((resolve, reject) => {
-    return rsocket.requestResponse(
-      {
-        data: Buffer.from(data),
-        metadata: encodeCompositeMetadata([
-          [MESSAGE_RSOCKET_ROUTING, encodeRoute(route)],
-        ]),
-      },
-      {
-        onError: (e) => {
-          reject(e);
-        },
-        onNext: (payload, isComplete) => {
-          Logger.info(
-            `requestResponse onNext payload[data: ${payload.data}; metadata: ${payload.metadata}]|${isComplete}`
-          );
-          resolve(payload);
-        },
-        onComplete: () => {
-          Logger.info(`requestResponse onComplete`);
-          resolve(null);
-        },
-        onExtension: () => {},
-      }
-    );
-  });
-}
-
