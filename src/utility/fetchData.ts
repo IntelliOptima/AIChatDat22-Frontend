@@ -1,4 +1,4 @@
-import Logger from "@/shared/logger";
+
 import { Chatroom } from "@/types/Chatroom";
 import { ChatMessage } from "@/types/Message";
 import { log } from "console";
@@ -44,7 +44,7 @@ abstract class FetchData {
     const response = await fetch(url);
 
     if (!response.ok) {
-      Logger.info("response body is NULL - returning from fetchDataAndSetListofObjects");
+      console.log("response body is NULL - returning from fetchDataAndSetListofObjects");
       return;
     }
 
