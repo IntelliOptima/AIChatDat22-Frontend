@@ -11,37 +11,42 @@ import type { Chatroom } from "@/types/Chatroom";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
-import { fetchData } from "next-auth/client/_utils";
-import FetchData from "@/utility/FetchData";
+import FetchData from "@/utility/fetchData";
 
 const Chatroom = () => {
   const { user } = useUser();
-  const { currentChatroom, setCurrentChatroom } = useCurrentChatroom();
+  const { currentChatroom, allChatrooms, setCurrentChatroom, setAllChatrooms } = useCurrentChatroom();
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
-  const [chatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [textForChatMessage, setTextForMessage] = useState<string>("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const hasMounted = useRef(false);
 
   useEffect(() => {
-    if (chatrooms.length === 0) {
+    if (allChatrooms.length === 0) {
       FetchData.fetchDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`,
-        setChatrooms
+        `${process.env.NEXT_PUBLIC_FETCH_ALL_CHATROOMS}${user?.id}`,
+        setAllChatrooms
       );
     }
 
-    if (chatrooms.length > 0) {
+    if (localStorage.getItem('currentChatroom')) {
+      setCurrentChatroom(JSON.parse(localStorage.getItem('currentChatroom')!));
+    }
+
+  }, [allChatrooms, user]);
+
+  useEffect(() => {
+    
+    if (allChatrooms.length > 0) {
       if (currentChatroom === undefined) {
-        setCurrentChatroom(chatrooms[0]);        
+        setCurrentChatroom(allChatrooms[0]);     
       }
       FetchData.fetchDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/message/findByChatroomId=${currentChatroom?.id !== undefined ? currentChatroom?.id : chatrooms[0].id}`,
+        `${process.env.NEXT_PUBLIC_FETCH_MESSAGES}${currentChatroom?.id !== undefined ? currentChatroom?.id : allChatrooms[0].id}`,
         setChatMessages
       );
     }
-
-  }, [chatrooms]);
+  }, [allChatrooms, currentChatroom]);
 
   useEffect(() => {
 
@@ -94,7 +99,7 @@ const Chatroom = () => {
     <div>
       <div className="flex flex-col">
         <div className="flex justify-center">          
-          <div className="border border-gray-200 w-3/4 h-[500px] p-2 rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
+          <div className="border border-gray-200 w-3/4 h-[500px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
             {chatMessages.length > 0 ? (
               <DisplayMessages chatMessages={chatMessages} />
             ) : (
