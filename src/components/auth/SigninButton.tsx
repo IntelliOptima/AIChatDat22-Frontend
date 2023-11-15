@@ -1,76 +1,34 @@
 "use client";
-
-import { signIn, signOut, useSession } from 'next-auth/react';
-import React, { useEffect } from 'react'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation';
-import { useUser } from '@/contexts/UserContext';
-import type { User } from '@/types/User';
-import FetchData from '@/utility/FetchData';
+import { useUser } from "@/contexts/UserContext";
+import useRedirectOnLogin from "@/hooks/useRedirectOnLogin";
+import useUpdateUser from "@/hooks/useUpdateUser";
+import Image from "next/image";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 const SigninButton = () => {
-    const { data: session } = useSession();
-    const { setUser } = useUser();
-    const router = useRouter();
+  const { data: session } = useSession();
+  const { user } = useUser();
 
+  useRedirectOnLogin(user);
+  useUpdateUser(session);
 
-    useEffect(() => {
-      const updateUser = async () => {
-        if (session) {
-          const sessionUser: User = {
-            email: session.user!.email!.toString(),
-            fullName: session.user!.name!.toString(),
-            profileImage: session.user!.image!.toString(),
-          };
-  
-          try {
-            const user = await FetchData.postFetch('http://localhost:8080/api/v1/user', sessionUser);
-            setUser(user);
-            router.replace('/dashboard');
-          } catch (error) {
-            console.error('Error updating user:', error);
-          }
-        }
-      };
-  
-      updateUser();
-    }, [session]);
-    
-  
-    if (session && session.user) {        
-      return (
-        <div className="flex gap-4 ml-auto items-center">
-          <Image
-            src={`${session.user.image}`}
-            alt="Vercel Logo"
-            className="rounded-full"
-            width={32}
-            height={32}
-          />
-          <p className="text-sky-600">{session.user.name}</p>
-          <button onClick={() => signOut()} className="text-red-600">
-            Sign Out
-          </button>
-        </div>
-      );
-    } else {
-        router.replace('/');
-    }
-
-
-  
+  if (!session || !session.user) {
     return (
-      <div>
-        <button
-          onClick={() =>
-                signIn()
-          }
-          className="text-green-600 ml-auto"
-        >
-          Sign In
-        </button>
-      </div>
+      <button onClick={() => signIn()} className="text-green-600 ml-auto">
+        Sign In
+      </button>
     );
-  };
-  
-  export default SigninButton;
+  }
+
+  return (
+    <div className="flex gap-4 ml-auto items-center">
+      <Image src={`${session.user.image}`} alt="User Image" className="rounded-full" width={32} height={32} />
+      <p className="text-sky-600">{session.user.name}</p>
+      <button onClick={() => signOut()} className="text-red-600">
+        Sign Out
+      </button>
+    </div>
+  );
+};
+
+export default SigninButton;

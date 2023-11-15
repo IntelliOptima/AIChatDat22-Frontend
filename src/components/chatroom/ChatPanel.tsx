@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import ChatNavbar from './ChatNavbar/ChatNavbar';
 import ChatSidebar from './ChatSidebar/ChatSidebar';
 import { useChatSidebar } from '@/contexts/ChatSidebarContext';
+import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 
 
 type ChatProps = {
@@ -12,6 +13,7 @@ type ChatProps = {
 
 const ChatPanel = ({ children }: ChatProps) => {
   const { sidebarOpen, setSidebarOpen } = useChatSidebar();
+  const { currentChatroom } = useCurrentChatroom();
 
   useEffect(() => {
     const storedSidebarOpen = localStorage.getItem('sidebarOpen');
@@ -19,6 +21,12 @@ const ChatPanel = ({ children }: ChatProps) => {
       setSidebarOpen(JSON.parse(storedSidebarOpen));
     }
   }, []);
+
+  useEffect(() => {
+    if (currentChatroom) {
+      localStorage.setItem('currentChatroom', JSON.stringify(currentChatroom));
+    }
+  }, [currentChatroom]);
 
   const openSidebar = () => {
     setSidebarOpen(!sidebarOpen);

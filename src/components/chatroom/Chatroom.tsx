@@ -11,8 +11,7 @@ import type { Chatroom } from "@/types/Chatroom";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
-import { fetchData } from "next-auth/client/_utils";
-import FetchData, { fetchChatMessages } from "@/utility/FetchData";
+import FetchData, { fetchChatMessages } from "@/utility/fetchData";
 
 enum ChatRoomState {
   Default,
@@ -23,12 +22,11 @@ enum ChatRoomState {
 
 const Chatroom = () => {
   const { user } = useUser();
-  const { currentChatroom, setCurrentChatroom } = useCurrentChatroom();
+  const { currentChatroom, allChatrooms, setCurrentChatroom, setAllChatrooms } = useCurrentChatroom();
 
   const [state, setState] = useState(ChatRoomState.Default);
 
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
-  const [chatrooms, setChatrooms] = useState<Chatroom[]>();
   const [textForChatMessage, setTextForMessage] = useState<string>("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>();
 
@@ -55,14 +53,14 @@ const Chatroom = () => {
   useEffect(() => {
     FetchData.fetchDataAndSetListOfObjects(
       `http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`,
-      setChatrooms
+      setAllChatrooms
     );
   }, []);
 
   useEffect(() => {
-    const current = chatrooms ? chatrooms[0] : undefined;
+    const current = allChatrooms ? allChatrooms[0] : undefined;
     setCurrentChatroom(current);
-  }, [chatrooms]);
+  }, [allChatrooms]);
 
   useEffect(() => {
     if (!currentChatroom) {
@@ -122,7 +120,7 @@ const Chatroom = () => {
     <div>
       <div className="flex flex-col">
         <div className="flex justify-center">
-          <div className="border border-gray-200 w-3/4 h-[500px] p-2 rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
+          <div className="border border-gray-200 w-3/4 h-[500px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
             {chatMessages ? (
               <DisplayMessages chatMessages={chatMessages} />
             ) : (

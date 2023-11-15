@@ -16,13 +16,9 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <ChatLayout>
+      {children}
+    </ChatLayout>
 
-      <body className={inter.className}>
-          <ChatLayout>
-            {children}
-          </ChatLayout>
-      </body>
-    </html>
   )
 }
