@@ -19,7 +19,8 @@ const useUpdateUser = (session: any) => {
                 };
 
                 try {
-                    const user = await FetchData.postFetch('http://localhost:8080/api/v1/user', sessionUser)
+                    const user = await FetchData.postFetch(`${process.env.NEXT_PUBLIC_FETCH_USER}`, sessionUser)
+                    console.log(process.env.NEXT_PUBLIC_FETCH_USER)
                     console.log('User updated:', user);
                     setUser(user);
                 } catch (error) {

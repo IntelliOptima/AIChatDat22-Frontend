@@ -24,7 +24,7 @@ const Chatroom = () => {
   useEffect(() => {
     if (allChatrooms.length === 0) {
       FetchData.fetchDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`,
+        `${process.env.NEXT_PUBLIC_FETCH_ALL_CHATROOMS}${user?.id}`,
         setAllChatrooms
       );
     }
@@ -36,13 +36,13 @@ const Chatroom = () => {
   }, [allChatrooms, user]);
 
   useEffect(() => {
-    console.log(allChatrooms.length)
+    
     if (allChatrooms.length > 0) {
       if (currentChatroom === undefined) {
         setCurrentChatroom(allChatrooms[0]);     
       }
       FetchData.fetchDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/message/findByChatroomId=${currentChatroom?.id !== undefined ? currentChatroom?.id : allChatrooms[0].id}`,
+        `${process.env.NEXT_PUBLIC_FETCH_MESSAGES}${currentChatroom?.id !== undefined ? currentChatroom?.id : allChatrooms[0].id}`,
         setChatMessages
       );
     }

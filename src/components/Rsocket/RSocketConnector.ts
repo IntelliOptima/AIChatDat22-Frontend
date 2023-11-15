@@ -19,7 +19,7 @@ import MESSAGE_RSOCKET_COMPOSITE_METADATA = WellKnownMimeType.MESSAGE_RSOCKET_CO
 
 export const getRSocketConnection = async () => {
   const connectorConnectionOptions = {
-    url: "ws://localhost:6565",
+    url: process.env.NEXT_PUBLIC_RSOCKET_CONNECTOR!
   };
   console.log(
     `Creating connector to ${JSON.stringify(connectorConnectionOptions)}`
