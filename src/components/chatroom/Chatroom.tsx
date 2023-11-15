@@ -12,47 +12,82 @@ import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 import { fetchData } from "next-auth/client/_utils";
-import FetchData from "@/utility/FetchData";
+import FetchData, { fetchChatMessages } from "@/utility/FetchData";
+
+enum ChatRoomState {
+  Default,
+  Loading,
+  Error,
+  OK,
+}
 
 const Chatroom = () => {
   const { user } = useUser();
   const { currentChatroom, setCurrentChatroom } = useCurrentChatroom();
+
+  const [state, setState] = useState(ChatRoomState.Default);
+
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
-  const [chatrooms, setChatrooms] = useState<Chatroom[]>([]);
+  const [chatrooms, setChatrooms] = useState<Chatroom[]>();
   const [textForChatMessage, setTextForMessage] = useState<string>("");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const hasMounted = useRef(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>();
 
   useEffect(() => {
-    if (chatrooms.length === 0) {
-      FetchData.fetchDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`,
-        setChatrooms
-      );
-    }
+    let socket: RSocket;
+    let cancelSocket = false;
 
-    if (chatrooms.length > 0) {
-      if (currentChatroom === undefined) {
-        setCurrentChatroom(chatrooms[0]);        
+    (async () => {
+      socket = await getRSocketConnection();
+      if (cancelSocket) {
+        socket.close();
+        return;
       }
-      FetchData.fetchDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/message/findByChatroomId=${currentChatroom?.id !== undefined ? currentChatroom?.id : chatrooms[0].id}`,
-        setChatMessages
-      );
-    }
 
+      setRSocket(socket);
+    })();
+
+    return () => {
+      cancelSocket = true;
+      if (socket) socket.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    FetchData.fetchDataAndSetListOfObjects(
+      `http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`,
+      setChatrooms
+    );
+  }, []);
+
+  useEffect(() => {
+    const current = chatrooms ? chatrooms[0] : undefined;
+    setCurrentChatroom(current);
   }, [chatrooms]);
 
   useEffect(() => {
+    if (!currentChatroom) {
+      setChatMessages(undefined);
+      return;
+    }
 
-    if (!rsocket && !hasMounted.current) {
-      const connectToRSocket = async () => {
-        setRSocket(await getRSocketConnection());
-        hasMounted.current = true;
-      };
-      connectToRSocket();
-    }    
+    let cancelFetch = false;
 
+    (async () => {
+      const messages = await fetchChatMessages(currentChatroom.id);
+      if (cancelFetch) return;
+
+      if (messages == undefined) {
+        // todo handle network error - what messages to show
+      }
+      setChatMessages(messages);
+    })();
+
+    return () => {
+      cancelFetch = true;
+    };
+  }, [currentChatroom]);
+
+  useEffect(() => {
     if (rsocket && currentChatroom?.id !== undefined) {
       console.log("RSOCKET CUR CHATROOM", currentChatroom);
 
@@ -62,13 +97,6 @@ const Chatroom = () => {
         setChatMessages
       );
     }
-
-    // return () => {
-    //   if (rsocket) {
-    //     rsocket.close();
-    //   }
-    // };
-
   }, [rsocket, currentChatroom]);
 
   const sendMessage = async (e: any) => {
@@ -78,9 +106,9 @@ const Chatroom = () => {
       textMessage: textForChatMessage,
       chatroomId: currentChatroom?.id!,
       createdDate: new Date(),
-      lastModifiedDate: new Date()
+      lastModifiedDate: new Date(),
     };
-    
+
     await rsocketMessageChannel(
       rsocket!,
       `chat.send.${currentChatroom?.id}`,
@@ -93,9 +121,9 @@ const Chatroom = () => {
   return (
     <div>
       <div className="flex flex-col">
-        <div className="flex justify-center">          
+        <div className="flex justify-center">
           <div className="border border-gray-200 w-3/4 h-[500px] p-2 rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
-            {chatMessages.length > 0 ? (
+            {chatMessages ? (
               <DisplayMessages chatMessages={chatMessages} />
             ) : (
               <p>No Messages</p>

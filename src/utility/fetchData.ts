@@ -1,7 +1,25 @@
 import Logger from "@/shared/logger";
 import { Chatroom } from "@/types/Chatroom";
+import { ChatMessage } from "@/types/Message";
 import { log } from "console";
 import { Dispatch, SetStateAction } from "react";
+
+export const fetchChatMessages = async (chatRoomID: string): Promise<ChatMessage[] | undefined> => {
+
+
+    const url = `http://localhost:8080/api/v1/message/findByChatroomId=${chatRoomID}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      Logger.info("response not ok");
+      return undefined;
+    }
+
+    const data = await response.json();
+    console.log("data: ", data);
+
+    return data;
+}
 
 abstract class FetchData {
 

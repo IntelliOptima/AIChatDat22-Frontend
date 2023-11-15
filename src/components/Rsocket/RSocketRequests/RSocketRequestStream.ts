@@ -13,7 +13,7 @@ import { Dispatch, SetStateAction } from "react";
 export const rsocketRequestStream = async (
   rsocket: RSocket,
   route: string,
-  setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>
+  setChatMessages: Dispatch<SetStateAction<ChatMessage[] | undefined>>
 ) => {
   // console.log(`Executing channelConnection: ${JSON.stringify({ route })}`);
 
