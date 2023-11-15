@@ -1,4 +1,4 @@
-import Logger from "@/shared/Logger";
+import Logger from "@/shared/logger";
 import { Chatroom } from "@/types/Chatroom";
 import { ChatMessage } from "@/types/Message";
 import { log } from "console";

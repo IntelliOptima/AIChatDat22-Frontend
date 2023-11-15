@@ -1,6 +1,6 @@
 import { WellKnownMimeType, encodeCompositeMetadata, encodeRoute } from "rsocket-composite-metadata";
 import { RSocket } from "rsocket-core";
-import Logger from "@/shared/Logger";
+import Logger from "@/shared/logger";
 
 import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING;
 
