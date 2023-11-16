@@ -21,7 +21,7 @@ export const getRSocketConnection = async () => {
 
     // Define URLs for production and development environments
     const devUrl = 'ws://localhost:8080/rsocket';
-    const prodUrl = 'ws://aichatbackend.azurewebsites.net:8080/rsocket';
+    const prodUrl = 'wss://aichatbackend.azurewebsites.net/rsocket';
   
     // Choose the URL based on the environment
     const urlConnection = process.env.NODE_ENV === 'production' ? prodUrl : devUrl;
