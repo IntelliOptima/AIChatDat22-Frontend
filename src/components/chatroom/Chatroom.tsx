@@ -49,20 +49,23 @@ const Chatroom = () => {
   }, [allChatrooms, currentChatroom]);
 
   useEffect(() => {
+    const connectToRSocket = async () => {
+      try {
+        const connection = await getRSocketConnection();
+        setRSocket(connection);
+        hasMounted.current = true;
+      } catch (error) {
+        console.error("Failed to establish RSocket connection:", error);
+      }
+    };
 
     if (!rsocket && !hasMounted.current) {
-      const connectToRSocket = async () => {
-        setRSocket(await getRSocketConnection());
-        hasMounted.current = true;
-      };
       connectToRSocket();
-    }    
+    }
 
     if (rsocket && currentChatroom?.id !== undefined) {
-      console.log("RSOCKET CUR CHATROOM", currentChatroom);
-
       rsocketRequestStream(
-        rsocket!,
+        rsocket,
         `chat.stream.${currentChatroom.id}`,
         setChatMessages
       );
@@ -73,11 +76,14 @@ const Chatroom = () => {
     //     rsocket.close();
     //   }
     // };
-
   }, [rsocket, currentChatroom]);
 
   const sendMessage = async (e: any) => {
     e.preventDefault();
+    if (!rsocket) {
+      console.error('RSocket connection is not established.');
+      return;
+    }
     const chatMessage: ChatMessage = {
       userId: user!.id!,
       textMessage: textForChatMessage,
