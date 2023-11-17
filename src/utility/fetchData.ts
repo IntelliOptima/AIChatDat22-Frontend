@@ -76,13 +76,14 @@ abstract class FetchData {
     }
   };
 
-  static postCreateChatroom = async (url: string, setCurrentChatroom: Dispatch<SetStateAction<Chatroom | undefined>>) => {
+  static postCreateChatroom = async (url: string, setCurrentChatroom: Dispatch<SetStateAction<Chatroom | undefined>>, chatroomName: string) => {
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: chatroomName
       });
 
       if (!response.ok) {

@@ -105,7 +105,7 @@ const Chatroom = () => {
     <div>
       <div className="flex flex-col">
         <div className="flex justify-center">          
-          <div className="border border-gray-200 w-3/4 h-[500px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
+          <div className="border border-gray-200 w-3/4 h-[700px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
             {chatMessages.length > 0 ? (
               <DisplayMessages chatMessages={chatMessages} />
             ) : (
