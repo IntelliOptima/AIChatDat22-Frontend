@@ -17,8 +17,8 @@ export const ChatroomCreatorAlert = async () => {
     });
     if (chatroomName) {
         Swal.fire(`Your chatroom has been named - ${chatroomName}`);
-        return chatroomName;
+        
     }
 
-
+    return chatroomName;
 }
