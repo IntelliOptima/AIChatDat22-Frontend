@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import ChatLayout from '@/layouts/ChatLayout'
 import SessionProviders from '@/components/auth/SessionProviders'
 import { UserProvider } from '@/contexts/UserContext'
 import { ChatroomProvider } from '@/contexts/ChatroomContext'
@@ -20,7 +19,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-
       <body className={inter.className}>
         <SessionProviders>
           <UserProvider>

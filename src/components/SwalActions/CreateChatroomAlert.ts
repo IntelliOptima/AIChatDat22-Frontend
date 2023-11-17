@@ -8,7 +8,7 @@ export const ChatroomCreatorAlert = async () => {
         showCancelButton: true,
         inputValidator: (value: string) => {
             if (!value) {
-                return "You need to write something!";
+                return "Must enter name for Chatroom!";
             }
         }
     });
