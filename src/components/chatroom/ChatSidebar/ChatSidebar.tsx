@@ -1,28 +1,32 @@
 "use client";
-import React, { useState } from 'react'
+import React, { use, useState } from 'react'
 import FetchData from '@/utility/fetchData';
-import { useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
 import { useCurrentChatroom } from '@/contexts/ChatroomContext'
-import { ChatroomCreatorAlert } from '@/components/SwalActions/CreateChatroomAlert';
+import ChatroomNameInput from '../ChatroomNameInput';
+import { useRouter } from 'next/navigation';
 
 type ChatSidebarProps = {
   sidebarOpen: boolean;
 };
 
 const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
+  const router = useRouter();
   const { user } = useUser();
   const { allChatrooms } = useCurrentChatroom();
   const { setCurrentChatroom } = useCurrentChatroom();
   const [newChatroomName, setNewChatroomName] = useState<string>('');
+  const [showChatroomNameInput, setShowChatroomNameInput] = useState<boolean>(false);
 
 
-  const handleCreateChatroom = async () => {
-    const newChatroomName = await ChatroomCreatorAlert();
-    setNewChatroomName(newChatroomName);
-    if (newChatroomName) {
-      console.log('newChatroomName', newChatroomName)
-    }
+  const handleCreateChatroom = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    FetchData.postCreateChatroom(`${process.env.NEXT_PUBLIC_CREATE_NEW_CHATROOM}${user?.id}`, setCurrentChatroom, newChatroomName)
+    router.replace("/dashboard")
+  }
+
+  const openChatroomNameInput = () => {
+    setShowChatroomNameInput(!showChatroomNameInput);
   }
 
   return (
@@ -38,8 +42,8 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
         <ul className="flex flex-col pt-10 justify-between h-2/5 text-black leading-loose">
 
           {allChatrooms.map((chatroom, id) => (
-            <a key={id} href='#' className='py-2 text-center hover:bg-gray-50 rounded-lg'
-              onClick={ () => setCurrentChatroom(chatroom)}>
+            <a key={id} className='py-2 text-center hover:bg-gray-50 hover:cursor-pointer rounded-lg'
+              onClick={() => setCurrentChatroom(chatroom)}>
               <li>{chatroom.chatroomName}</li>
             </a>
           ))
@@ -47,10 +51,17 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
         </ul>
 
       </div>
-      <div className='flex justify-center pb-10'>
-        <a href='#' className='text-black text-center w-full hover:scale-110'
-          onClick={() => handleCreateChatroom()
-          .then(() => FetchData.postCreateChatroom(`${process.env.NEXT_PUBLIC_CREATE_NEW_CHATROOM}${user?.id}`, setCurrentChatroom, newChatroomName))}>
+      
+      <div className='flex flex-col items-center justify-center pb-20'>
+      {
+          showChatroomNameInput &&
+            <ChatroomNameInput
+              setNewChatroomName={setNewChatroomName}
+              handleCreateChatroom={handleCreateChatroom}
+            /> 
+        }
+        <a className='text-black text-center w-full hover:scale-110 hover:cursor-pointer'
+          onClick={openChatroomNameInput}>
           + Create new chat
         </a>
       </div>

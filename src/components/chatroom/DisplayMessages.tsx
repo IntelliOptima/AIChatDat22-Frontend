@@ -11,6 +11,7 @@ export const DisplayMessages = ({ chatMessages }: { chatMessages: ChatMessage[] 
   const {currentChatroom} = useCurrentChatroom();
   const user = useUser();
 
+
   const findProfileImage = (userId: number) => {
     if (userId === 1) {
       return GPTLOGO;
@@ -38,6 +39,7 @@ export const DisplayMessages = ({ chatMessages }: { chatMessages: ChatMessage[] 
               ) : (
                 <Image
                   src={`${findProfileImage(message.userId)}`}
+                  //src={`${user.user?.profileImage}`}
                   width={32}
                   height={32}
                   alt="user Image"
