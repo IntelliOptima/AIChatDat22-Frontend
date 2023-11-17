@@ -5,6 +5,7 @@ import { useUser } from '@/contexts/UserContext';
 import { useCurrentChatroom } from '@/contexts/ChatroomContext'
 import ChatroomNameInput from '../ChatroomNameInput';
 import { useRouter } from 'next/navigation';
+import { ChatroomCreatorAlert } from '@/components/SwalActions/CreateChatroomAlert';
 
 type ChatSidebarProps = {
   sidebarOpen: boolean;
@@ -19,10 +20,12 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
   const [showChatroomNameInput, setShowChatroomNameInput] = useState<boolean>(false);
 
 
-  const handleCreateChatroom = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    FetchData.postCreateChatroom(`${process.env.NEXT_PUBLIC_CREATE_NEW_CHATROOM}${user?.id}`, setCurrentChatroom, newChatroomName)
-    router.replace("/dashboard")
+  const handleCreateChatroom = async () => {
+    const chatroomName = await ChatroomCreatorAlert();
+    if (chatroomName) {
+      FetchData.postCreateChatroom(`${process.env.NEXT_PUBLIC_CREATE_NEW_CHATROOM}${user?.id}`, setCurrentChatroom, chatroomName);
+      router.replace('/dashboard');
+    }
   }
 
   const openChatroomNameInput = () => {
@@ -61,7 +64,7 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
             /> 
         }
         <a className='text-black text-center w-full hover:scale-110 hover:cursor-pointer'
-          onClick={openChatroomNameInput}>
+          onClick={() => handleCreateChatroom()}>
           + Create new chat
         </a>
       </div>
