@@ -9,7 +9,6 @@ import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 
 export const DisplayMessages = ({ chatMessages }: { chatMessages: ChatMessage[] }) => {
   const {currentChatroom} = useCurrentChatroom();
-  const { data: session } = useSession();
   const user = useUser();
 
   const findProfileImage = (userId: number) => {
@@ -45,7 +44,7 @@ export const DisplayMessages = ({ chatMessages }: { chatMessages: ChatMessage[] 
                   className={`${message.userId === user.user?.id ? 'ml-4' : 'mr-4'} rounded-full`}
                 />
               )}
-              <p className={`my-4 border border-gray-200 w-full rounded-xl p-2 h-auto shadow-md`} style={{ wordWrap: "break-word" }}>
+              <p className={` mb-16 border border-gray-200 w-full rounded-xl p-2 h-auto shadow-md`} style={{ wordWrap: "break-word" }}>
                 {message.textMessage}
               </p>
             </div>

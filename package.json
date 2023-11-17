@@ -24,6 +24,7 @@
     "rsocket-websocket-client": "^1.0.0-alpha.3",
     "rsocket-websocket-server": "^1.0.0-alpha.3",
     "sharp": "^0.32.6",
+    "sweetalert2": "^11.10.0",
     "ws": "~8.2.3"
   },
   "devDependencies": {
