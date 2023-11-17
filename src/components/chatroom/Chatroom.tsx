@@ -8,17 +8,16 @@ import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSoc
 import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
-import type { User } from "@/types/User";
-
 import { useEffect, useRef, useState } from "react";
 import FetchData from "@/utility/fetchData";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
-import { fetchData } from "next-auth/client/_utils";
+
 
 const Chatroom = () => {
   const { user } = useUser();
-  const {currentChatroom} = useCurrentChatroom();
+  //const {currentChatroom} = useCurrentChatroom();
+  const [currentChatroom, setCurrentChatroom] = useState<string | null>("48aafb29-ba0c-43d0-86da-633d7b3bd5b4");
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
   const [relatedChatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [textForChatMessage, setTextForMessage] = useState<string>("");
@@ -26,11 +25,11 @@ const Chatroom = () => {
   const hasMounted = useRef(false);
 
   useEffect(() => {
-    FetchData.streamDataAndSetListOfObjects(`http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`, setChatrooms);
+    //FetchData.streamDataAndSetListOfObjects(`http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`, setChatrooms);
 
     if (currentChatroom) {
       FetchData.streamDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/message/`,
+        `http://localhost:8080/api/v1/message`,
         setChatMessages
       );
     }
@@ -66,7 +65,7 @@ const Chatroom = () => {
     const chatMessage: ChatMessage = {
       userId: user!.id!,
       textMessage: textForChatMessage,
-      chatroomId: currentChatroom!.chatroomId,
+      chatroomId: currentChatroom!,
       createdDate: new Date(),
       lastModifiedDate: new Date(),
       // ... any other fields that need to be sent
@@ -75,7 +74,7 @@ const Chatroom = () => {
     console.log("CHatMessages: ", chatMessages);
     await rsocketMessageChannel(
       rsocket!,
-      `chat.send.${currentChatroom?.chatroomId}`,
+      `chat.send.${currentChatroom}`,
       chatMessage
     );
 
