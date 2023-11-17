@@ -1,3 +1,5 @@
+import { StaticImageData } from "next/image";
+
 export type User = {
   id?: number;
   fullName: string;
