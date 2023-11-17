@@ -5,10 +5,21 @@ import Image from 'next/image'
 import { useSession } from "next-auth/react";
 
 import GPTLOGO from '@/images/GPTImage.jpeg'
+import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 
 export const DisplayMessages = ({ chatMessages }: { chatMessages: ChatMessage[] }) => {
+  const {currentChatroom} = useCurrentChatroom();
   const { data: session } = useSession();
   const user = useUser();
+
+  const findProfileImage = (userId: number) => {
+    if (userId === 1) {
+      return GPTLOGO;
+    } else {
+      return currentChatroom?.users.find((user) => user.id === userId)?.profileImage;
+    }
+  }
+
 
   return (
     <div>
@@ -27,7 +38,7 @@ export const DisplayMessages = ({ chatMessages }: { chatMessages: ChatMessage[] 
                 />
               ) : (
                 <Image
-                  src={`${user.user?.profileImage === undefined ? session?.user?.image : user.user?.profileImage}`}
+                  src={`${findProfileImage(message.userId)}`}
                   width={32}
                   height={32}
                   alt="user Image"
