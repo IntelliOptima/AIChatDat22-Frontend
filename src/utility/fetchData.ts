@@ -98,6 +98,28 @@ abstract class FetchData {
   };
 
 
+  static postAddUserToChatroom = async (url: string, friendEmail: string) => {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: friendEmail
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      console.log("RESPONSE: ", response);      
+    } catch (error) {
+      console.error('Error:', error);
+      throw error; // Rethrow the error for further handling if needed
+    }
+  
+  }
+
+
   
   static streamGPTAnswer = async <T extends ChatMessage> (
     url: string,

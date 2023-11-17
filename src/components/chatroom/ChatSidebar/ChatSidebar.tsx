@@ -14,7 +14,7 @@ type ChatSidebarProps = {
 const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
   const router = useRouter();
   const { user } = useUser();
-  const { allChatrooms } = useCurrentChatroom();
+  const { currentChatroom ,allChatrooms } = useCurrentChatroom();
   const { setCurrentChatroom } = useCurrentChatroom();
   const [newChatroomName, setNewChatroomName] = useState<string>('');
   const [showChatroomNameInput, setShowChatroomNameInput] = useState<boolean>(false);
@@ -45,7 +45,7 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
         <ul className="flex flex-col pt-10 justify-between h-2/5 text-black leading-loose">
 
           {allChatrooms.map((chatroom, id) => (
-            <a key={id} className='py-2 text-center hover:bg-gray-50 hover:cursor-pointer rounded-lg'
+            <a key={id} className={`${chatroom.id === currentChatroom?.id ? 'bg-green-400' : ''} py-2 text-center ${chatroom.id === currentChatroom?.id ? 'hover:bg-green-300' : 'hover:bg-gray-100'} hover:cursor-pointer rounded-lg`}
               onClick={() => setCurrentChatroom(chatroom)}>
               <li>{chatroom.chatroomName}</li>
             </a>
@@ -63,7 +63,7 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
               handleCreateChatroom={handleCreateChatroom}
             /> 
         }
-        <a className='text-black text-center w-full hover:scale-110 hover:cursor-pointer'
+        <a className='text-black text-center w-full hover:scale-110 hover:cursor-pointer transition duration-200'
           onClick={() => handleCreateChatroom()}>
           + Create new chat
         </a>
