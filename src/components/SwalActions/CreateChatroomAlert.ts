@@ -1,9 +1,6 @@
 import Swal from "sweetalert2";
 
-
-
 export const ChatroomCreatorAlert = async () => { 
-
     let { value: chatroomName } = await Swal.fire({
         title: "Enter Chatroom name",
         input: "text",
@@ -15,9 +12,12 @@ export const ChatroomCreatorAlert = async () => {
             }
         }
     });
+
     if (chatroomName) {
-        Swal.fire(`Your chatroom has been named - ${chatroomName}`);
-        
+        Swal.fire({
+            icon: 'success',
+            title: `Your chatroom has been named - ${chatroomName}`
+        });
     }
 
     return chatroomName;
