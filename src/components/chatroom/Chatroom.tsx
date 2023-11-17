@@ -9,72 +9,92 @@ import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
 import { useEffect, useRef, useState } from "react";
-import FetchData from "@/utility/fetchData";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
-
+import FetchData from "@/utility/fetchData";
 
 const Chatroom = () => {
   const { user } = useUser();
-  //const {currentChatroom} = useCurrentChatroom();
-  const [currentChatroom, setCurrentChatroom] = useState<string | null>("48aafb29-ba0c-43d0-86da-633d7b3bd5b4");
+  const { currentChatroom, allChatrooms, setCurrentChatroom, setAllChatrooms } = useCurrentChatroom();
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
-  const [relatedChatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [textForChatMessage, setTextForMessage] = useState<string>("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const hasMounted = useRef(false);
 
   useEffect(() => {
-    //FetchData.streamDataAndSetListOfObjects(`http://localhost:8080/api/v1/chatroom/participatingChatrooms/${user?.id}`, setChatrooms);
+    if (allChatrooms.length === 0) {
+      FetchData.fetchDataAndSetListOfObjects(
+        `${process.env.NEXT_PUBLIC_FETCH_ALL_CHATROOMS}${user?.id}`,
+        setAllChatrooms
+      );
+    }
 
-    if (currentChatroom) {
-      FetchData.streamDataAndSetListOfObjects(
-        `http://localhost:8080/api/v1/message`,
+    if (localStorage.getItem('currentChatroom')) {
+      setCurrentChatroom(JSON.parse(localStorage.getItem('currentChatroom')!));
+    }
+
+  }, [allChatrooms, user]);
+
+  useEffect(() => {
+    
+    if (allChatrooms.length > 0) {
+      if (currentChatroom === undefined) {
+        setCurrentChatroom(allChatrooms[0]);     
+      }
+      FetchData.fetchDataAndSetListOfObjects(
+        `${process.env.NEXT_PUBLIC_FETCH_MESSAGES}${currentChatroom?.id !== undefined ? currentChatroom?.id : allChatrooms[0].id}`,
+        setChatMessages
+      );
+    }
+  }, [allChatrooms, currentChatroom]);
+
+  useEffect(() => {
+    const connectToRSocket = async () => {
+      try {
+        const connection = await getRSocketConnection();
+        setRSocket(connection);
+        hasMounted.current = true;
+      } catch (error) {
+        console.error("Failed to establish RSocket connection:", error);
+      }
+    };
+
+    if (!rsocket && !hasMounted.current) {
+      connectToRSocket();
+    }
+
+    if (rsocket && currentChatroom?.id !== undefined) {
+      rsocketRequestStream(
+        rsocket,
+        `chat.stream.${currentChatroom.id}`,
         setChatMessages
       );
     }
 
-    if (!rsocket && !hasMounted.current) {
-      const connectToRSocket = async () => {
-        setRSocket(await getRSocketConnection());
-        console.log("ESTABLISHING CONNECTION FOR RSOCKET!");
-        hasMounted.current = true;
-      };
-      connectToRSocket();
-    }
-
-    return () => {
-      if (rsocket) {
-        rsocket.close();
-      }
-    };
-  }, [currentChatroom]);
-
-  useEffect(() => {
-    if (rsocket && currentChatroom) {
-      rsocketRequestStream(
-        rsocket!,
-        `chat.stream.${currentChatroom}`,
-        setChatMessages
-      );      
-    }
-  }, [rsocket]);
+    // return () => {
+    //   if (rsocket) {
+    //     rsocket.close();
+    //   }
+    // };
+  }, [rsocket, currentChatroom]);
 
   const sendMessage = async (e: any) => {
     e.preventDefault();
+    if (!rsocket) {
+      console.error('RSocket connection is not established.');
+      return;
+    }
     const chatMessage: ChatMessage = {
       userId: user!.id!,
       textMessage: textForChatMessage,
-      chatroomId: currentChatroom!,
+      chatroomId: currentChatroom?.id!,
       createdDate: new Date(),
-      lastModifiedDate: new Date(),
-      // ... any other fields that need to be sent
+      lastModifiedDate: new Date()
     };
-
-    console.log("CHatMessages: ", chatMessages);
+    
     await rsocketMessageChannel(
       rsocket!,
-      `chat.send.${currentChatroom}`,
+      `chat.send.${currentChatroom?.id}`,
       chatMessage
     );
 
@@ -84,8 +104,8 @@ const Chatroom = () => {
   return (
     <div>
       <div className="flex flex-col">
-        <div className="flex justify-center">
-          <div className="border border-gray-200 w-3/4 h-[500px] p-2 rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
+        <div className="flex justify-center">          
+          <div className="border border-gray-200 w-3/4 h-[700px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
             {chatMessages.length > 0 ? (
               <DisplayMessages chatMessages={chatMessages} />
             ) : (
@@ -94,24 +114,25 @@ const Chatroom = () => {
           </div>
         </div>
 
-        
-          <form onSubmit={sendMessage}>
+        <form onSubmit={sendMessage}>
           <div className="flex justify-center">
-          <input
-            type="text"
-            placeholder="Write a message..."
-            value={textForChatMessage}
-            onChange={(e) => setTextForMessage(e.target.value)}
-            className="border border-gray-400 w-3/4 p-2 rounded-lg shadow-md text-black mr-6 bg-white"
+            <input
+              type="text"
+              placeholder="Write a message..."
+              value={textForChatMessage}
+              onChange={(e) => setTextForMessage(e.target.value)}
+              className="border border-gray-400 w-3/4 p-2 rounded-lg shadow-md text-black mr-6 bg-white"
             />
-          {textForChatMessage != "" && (
-            <button type="submit" className="text-black font-semibold hover:scale-110">
-              Send
-            </button>
-          )}
+            {textForChatMessage != "" && (
+              <button
+                type="submit"
+                className="text-black font-semibold hover:scale-110"
+              >
+                Send
+              </button>
+            )}
           </div>
-          </form>
-        
+        </form>
       </div>
     </div>
   );

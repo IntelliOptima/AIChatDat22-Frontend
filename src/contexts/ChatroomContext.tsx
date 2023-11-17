@@ -1,22 +1,30 @@
 "use client";
-
+import React, { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 import { Chatroom } from '@/types/Chatroom';
-import React, { createContext, useContext, ReactNode, useState, Dispatch, SetStateAction } from 'react';
-
 
 type CurrentChatroomContextType = {
   currentChatroom: Chatroom | undefined;
+  allChatrooms: Chatroom[];
   setCurrentChatroom: Dispatch<SetStateAction<Chatroom | undefined>>;
+  setAllChatrooms: Dispatch<SetStateAction<Chatroom[]>>;
 }
 
-const ChatroomContext = createContext<CurrentChatroomContextType | undefined>(undefined);
+// Define a default value for the context
+const defaultChatroomContextValue: CurrentChatroomContextType = {
+  currentChatroom: undefined,
+  allChatrooms: [],
+  setCurrentChatroom: () => {}, // No-op function  
+  setAllChatrooms: () => {} // No-op function
+};
 
+const ChatroomContext = createContext<CurrentChatroomContextType>(defaultChatroomContextValue);
 
 export function ChatroomProvider({ children }: { children: ReactNode }) {
   const [currentChatroom, setCurrentChatroom] = useState<Chatroom | undefined>(undefined);
+  const [allChatrooms, setAllChatrooms] = useState<Chatroom[]>([]);
 
   return (
-    <ChatroomContext.Provider value={{ currentChatroom, setCurrentChatroom }}>
+    <ChatroomContext.Provider value={{ currentChatroom, allChatrooms, setAllChatrooms ,setCurrentChatroom }}>
       {children}
     </ChatroomContext.Provider>
   );
@@ -24,8 +32,8 @@ export function ChatroomProvider({ children }: { children: ReactNode }) {
 
 export function useCurrentChatroom() {
   const context = useContext(ChatroomContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
+  if (!context) {
+    throw new Error('useCurrentChatroom must be used within a ChatroomProvider');
   }
   return context;
 }

@@ -1,6 +1,5 @@
 import { WellKnownMimeType, encodeCompositeMetadata, encodeRoute } from "rsocket-composite-metadata";
 import { RSocket } from "rsocket-core";
-import Logger from "@/shared/logger";
 
 import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING;
 
@@ -20,13 +19,13 @@ export async function requestResponse(rsocket: RSocket, route: string, chatMessa
             reject(e);
           },
           onNext: (payload, isComplete) => {
-            Logger.info(
+            console.log(
               `requestResponse onNext payload[data: ${payload.data}; metadata: ${payload.metadata}]|${isComplete}`
             );
             resolve(payload);
           },
           onComplete: () => {
-            Logger.info(`requestResponse onComplete`);
+            console.log(`requestResponse onComplete`);
             resolve(null);
           },
           onExtension: () => {},

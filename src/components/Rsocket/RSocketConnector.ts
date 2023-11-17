@@ -18,8 +18,15 @@ import MESSAGE_RSOCKET_COMPOSITE_METADATA = WellKnownMimeType.MESSAGE_RSOCKET_CO
  */
 
 export const getRSocketConnection = async () => {
+
+    // Define URLs for production and development environments
+    const devUrl = 'ws://localhost:8080/rsocket';
+    const prodUrl = 'wss://aichatbackend.azurewebsites.net/rsocket';
+  
+    // Choose the URL based on the environment
+    const urlConnection = process.env.NODE_ENV === 'production' ? prodUrl : devUrl;
   const connectorConnectionOptions = {
-    url: "ws://localhost:6565",
+    url: urlConnection
   };
   console.log(
     `Creating connector to ${JSON.stringify(connectorConnectionOptions)}`

@@ -1,11 +1,14 @@
+
 import { Chatroom } from "@/types/Chatroom";
+import { ChatMessage } from "@/types/Message";
+import { log } from "console";
 import { Dispatch, SetStateAction } from "react";
 
 abstract class FetchData {
 
-  static streamDataAndSetListOfObjects = async <T> (
+  static streamDataAndSetListOfRecords = async <T> (
     url: string,
-    setDataObject: Dispatch<SetStateAction<T[]>>
+    setDataRecord: Dispatch<SetStateAction<T[]>>,
   ) => {
     const response = await fetch(url);
     if (!response.body) {
@@ -17,25 +20,40 @@ abstract class FetchData {
   
     while (true) {
       const { done, value } = await reader.read();
-  
+
       if (done) {
         break;
       }
   
-      const message = new TextDecoder().decode(value);
-      const messages = message.split("\n").filter(Boolean);
+      const object = new TextDecoder().decode(value);
+      const objects = object.split("\n").filter(Boolean);
   
-      messages.forEach((line) => {
+      objects.forEach((line) => {
         try {
-          const parsedObject = JSON.parse(line) as T;
-          console.log("Parsed Message:", parsedObject);
-          setDataObject((prevState: T[]) => [...prevState, parsedObject]);
+          const parsedRecord = JSON.parse(line) as T;
+          console.log("PARSED OBJECT:", parsedRecord);
+          setDataRecord((prevState: T[]) => [...prevState, parsedRecord]);          
         } catch (error) {
           console.error("Error parsing JSON:", error);
         }
       });
     }
   };
+
+  static fetchDataAndSetListOfObjects = async <T> (url: string, setDataObject: Dispatch<SetStateAction<T[]>>) => {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.log("response body is NULL - returning from fetchDataAndSetListofObjects");
+      return;
+    }
+
+    const data = await response.json();
+    console.log("THIS IS DATA: ", data);
+
+    setDataObject(data);
+    
+  }
 
   static postFetch = async <T> (url: string, data: T) => {
     try {
@@ -58,26 +76,77 @@ abstract class FetchData {
     }
   };
 
-  static postCreateChatroom = async (url: string) => {
+  static postCreateChatroom = async (url: string, setCurrentChatroom: Dispatch<SetStateAction<Chatroom | undefined>>, chatroomName: string) => {
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: chatroomName
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       console.log("RESPONSE: ", response);
-      return await response.json() as Chatroom; // Assuming the response is JSON
+      setCurrentChatroom(await response.json() as Chatroom);
     } catch (error) {
       console.error('Error:', error);
       throw error; // Rethrow the error for further handling if needed
     }
   };
+
+
+  
+  static streamGPTAnswer = async <T extends ChatMessage> (
+    url: string,
+    setDataRecord: Dispatch<SetStateAction<T[]>>
+  ) => {
+    const response = await fetch(url);
+    if (!response.body) {
+      console.log("response body is NULL - returning from streamData")
+      return;
+    }
+  
+    const reader = response.body.getReader();
+  
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+  
+      const object = new TextDecoder().decode(value);
+      const objects = object.split("\n").filter(Boolean);
+
+      objects.forEach((line) => {
+        try {
+          const parsedRecord = JSON.parse(line) as T;
+          console.log("PARSED OBJECT:", parsedRecord);
+          setDataRecord((prevState) => {
+            // If the message is from GPT (userId = 1), append its text to the last GPT message
+            if (parsedRecord.userId === 1) {
+              let lastMessage = prevState[prevState.length - 1];
+              if (lastMessage && lastMessage.userId === 1) {
+                return prevState.slice(0, -1).concat({
+                  ...lastMessage,
+                  textMessage: lastMessage.textMessage + parsedRecord.textMessage
+                });
+              }
+            }
+            return [...prevState, parsedRecord];
+          });          
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+        }
+      });
+    }
+  };
 }
+
+
+
+
+
 
 export default FetchData;
 
