@@ -8,10 +8,13 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let lastPayload = "";
+
 export const rsocketGptRequestStream = async (
     rsocket: RSocket,
     route: string,
-    setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>
+    setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>,
+    setIsGptStreaming: Dispatch<SetStateAction<boolean>>
 ) => {
     return new Promise((resolve, reject) => {
         const connector = rsocket.requestStream(
@@ -25,19 +28,27 @@ export const rsocketGptRequestStream = async (
                 onNext: async (payload, isComplete) => {
                     console.log(`payload[data: ${payload.data}; metadata: ${payload.metadata}]|${isComplete}`);
 
+                    
+                    if (payload.data?.toString() === "Gpt Finished message") {
+                        setIsGptStreaming(false);
+                        lastPayload = "";
+                        return;
+                    }
                     if (payload.data) {
                         const newMessageContent = payload.data.toString();
                         updateChatMessage(newMessageContent, route, setChatMessages);
                     }
+                    
                 },
-                onComplete: () => resolve(null),
+                onComplete: () => {                    
+                    resolve(null)},
                 onExtension: () => { },
             }
         );
         connector.request(2147483647);
     });
 };
-let lastPayload = "";
+
 
 function updateChatMessage(newContent: string, route: string, setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>) {
     const chatroomId = route.split(".")[2];

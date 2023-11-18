@@ -5,8 +5,6 @@ import { createRoute } from "../RSocketConnector";
 
 
 export const rsocketMessageChannel = async (rsocket: RSocket, route: string, chatMessage: ChatMessage) => {
-    // console.log(`Executing channelConnection: ${JSON.stringify({ route, chatMessage })}`);
-    
     return new Promise((resolve, reject) => {
       rsocket.fireAndForget(
         {
