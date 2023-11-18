@@ -8,7 +8,7 @@ import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSoc
 import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 import { handleAddUserToChatroom, useSetupChatroom } from "./ChatroomUtils";
@@ -31,6 +31,7 @@ const Chatroom = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isGptStreaming, setIsGptStreaming] = useState(false);
   const hasMounted = useRef(false);
+  const chatWindowRef = useRef<HTMLDivElement>(null);
 
   useSetupChatroom({ allChatrooms, user, currentChatroom, setCurrentChatroom, setAllChatrooms, rsocket, setRSocket, setChatMessages, hasMounted, setIsGptStreaming });
 
@@ -76,11 +77,27 @@ const Chatroom = () => {
     setTextForMessage("");
   };
 
+  useEffect(() => {
+    if (chatWindowRef.current) {
+      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(e);
+    }
+  }
+
+
   return (
     <div className="flex justify-center content-center">
       <div className="flex flex-col flex-1">
         <div className="flex justify-center">
-          <div className="border border-gray-200 w-3/4 h-[700px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
+          <div 
+          ref={chatWindowRef}
+          className="border border-gray-200 w-3/4 h-[700px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
             {chatMessages.length > 0 ? (
               <DisplayMessages chatMessages={chatMessages} />
             ) : (
@@ -94,6 +111,7 @@ const Chatroom = () => {
             <textarea
               placeholder="Write a message..."
               value={textForChatMessage}
+              onKeyDown={handleKeyPress}
               onChange={(e) => setTextForMessage(e.target.value)}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement;

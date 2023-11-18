@@ -25,7 +25,7 @@ export const DisplayMessages = ({ chatMessages }: { chatMessages: ChatMessage[] 
         {link}
       </a>
     ) : (
-      <p className={`mb-16 border border-gray-200 w-auto rounded-xl p-2 h-auto shadow-md`} style={{ wordWrap: "break-word" }}>
+      <p className={`mb-16 border border-gray-200 max-w-xl rounded-xl p-2 h-auto shadow-md`} style={{ wordWrap: "break-word" }}>
         {message.textMessage}
       </p>
     );
