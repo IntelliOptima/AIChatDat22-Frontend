@@ -7,6 +7,7 @@ import { getRSocketConnection } from "../Rsocket/RSocketConnector";
 import { ChatMessage } from "@/types/Message";
 import { rsocketRequestStream } from "../Rsocket/RSocketRequests/RSocketRequestStream";
 import { AddUserToChatroom } from "../SwalActions/AddUserToChatroomAlert";
+import { rsocketGptRequestStream } from "../Rsocket/RSocketRequests/RSocketGPTRequestStream";
 
 type setUpChatroomProps = {
   allChatrooms: Chatroom[];
@@ -82,6 +83,12 @@ export const useSetupChatroom = (
       rsocketRequestStream(
         rsocket,
         `chat.stream.${currentChatroom.id}`,
+        setChatMessages
+      );
+
+      rsocketGptRequestStream(
+        rsocket,
+        `chat.gptstream.${currentChatroom.id}`,
         setChatMessages
       );
     }
