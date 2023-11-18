@@ -3,6 +3,7 @@
 import { getRSocketConnection } from "@/components/Rsocket/RSocketConnector";
 
 import { DisplayMessages } from "./DisplayMessages";
+
 import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSocketFireAndForgetMessage";
 import { RSocket } from "rsocket-core";
 import type { ChatMessage } from "@/types/Message";
@@ -10,7 +11,7 @@ import type { Chatroom } from "@/types/Chatroom";
 import { useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
-import { handleAddUserToChatroom, setUpChatroom } from "./ChatroomUtils";
+import { handleAddUserToChatroom, useSetupChatroom } from "./ChatroomUtils";
 
 enum ChatRoomState {
   Default,
@@ -28,7 +29,7 @@ const Chatroom = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const hasMounted = useRef(false);
 
-  setUpChatroom({ allChatrooms, user, currentChatroom, setCurrentChatroom, setAllChatrooms, rsocket, setRSocket, setChatMessages, hasMounted });
+  useSetupChatroom({ allChatrooms, user, currentChatroom, setCurrentChatroom, setAllChatrooms, rsocket, setRSocket, setChatMessages, hasMounted });
 
   const sendMessage = async (e: any) => {
     e.preventDefault();
