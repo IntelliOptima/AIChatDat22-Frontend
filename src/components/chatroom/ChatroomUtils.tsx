@@ -19,6 +19,7 @@ type setUpChatroomProps = {
   setRSocket: Dispatch<SetStateAction<RSocket | null>>;
   setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>;
   hasMounted: React.MutableRefObject<boolean>;
+  setIsGptStreaming: Dispatch<SetStateAction<boolean>>;
 }
 
 export const useSetupChatroom = (
@@ -31,7 +32,8 @@ export const useSetupChatroom = (
     rsocket,
     setRSocket,
     setChatMessages,
-    hasMounted
+    hasMounted,
+    setIsGptStreaming
   
   }: setUpChatroomProps
 
@@ -89,7 +91,8 @@ export const useSetupChatroom = (
       rsocketGptRequestStream(
         rsocket,
         `chat.gptstream.${currentChatroom.id}`,
-        setChatMessages
+        setChatMessages,
+        setIsGptStreaming
       );
     }
     

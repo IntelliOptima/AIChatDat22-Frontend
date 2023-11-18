@@ -11,7 +11,8 @@ function sleep(ms: number) {
 export const rsocketGptRequestStream = async (
     rsocket: RSocket,
     route: string,
-    setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>
+    setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>,
+    setIsGptStreaming: Dispatch<SetStateAction<boolean>>
 ) => {
     return new Promise((resolve, reject) => {
         const connector = rsocket.requestStream(
@@ -25,18 +26,27 @@ export const rsocketGptRequestStream = async (
                 onNext: async (payload, isComplete) => {
                     console.log(`payload[data: ${payload.data}; metadata: ${payload.metadata}]|${isComplete}`);
 
+                    
+                    if (payload.data?.toString() === "Gpt Finished message") {
+                        setIsGptStreaming(false);
+                        return;
+                    }
                     if (payload.data) {
                         const newMessageContent = payload.data.toString();
                         updateChatMessage(newMessageContent, route, setChatMessages);
                     }
+                    
                 },
-                onComplete: () => resolve(null),
+                onComplete: () => {                    
+                    resolve(null)},
                 onExtension: () => { },
             }
         );
         connector.request(2147483647);
     });
 };
+
+
 let lastPayload = "";
 
 function updateChatMessage(newContent: string, route: string, setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>) {
