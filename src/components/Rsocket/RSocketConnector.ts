@@ -1,11 +1,10 @@
-import { RSocket, RSocketConnector } from "rsocket-core";
+import { RSocketConnector } from "rsocket-core";
 import { WebsocketClientTransport } from "rsocket-websocket-client";
 import {
   encodeCompositeMetadata,
   encodeRoute,
   WellKnownMimeType,
 } from "rsocket-composite-metadata";
-import { exit } from "process";
 import MESSAGE_RSOCKET_ROUTING = WellKnownMimeType.MESSAGE_RSOCKET_ROUTING;
 import MESSAGE_RSOCKET_COMPOSITE_METADATA = WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA;
 

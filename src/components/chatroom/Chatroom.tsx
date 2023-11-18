@@ -12,6 +12,8 @@ import { useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 import { handleAddUserToChatroom, useSetupChatroom } from "./ChatroomUtils";
+import { isGPTStreamingAlert } from "../SwalActions/IsGPTStreamingAlert";
+import { rsocketGptRequestStream } from "../Rsocket/RSocketRequests/RSocketGPTRequestStream";
 
 enum ChatRoomState {
   Default,
@@ -25,11 +27,12 @@ const Chatroom = () => {
   const [state, setState] = useState(ChatRoomState.Default); // TODO use state for loading spinner and other informational display
   const { currentChatroom, allChatrooms, setCurrentChatroom, setAllChatrooms } = useCurrentChatroom();
   const [rsocket, setRSocket] = useState<RSocket | null>(null);
-  const [textForChatMessage, setTextForMessage] = useState<string>("");
+  const [textForChatMessage, setTextForMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [isGptStreaming, setIsGptStreaming] = useState(false);
   const hasMounted = useRef(false);
 
-  useSetupChatroom({ allChatrooms, user, currentChatroom, setCurrentChatroom, setAllChatrooms, rsocket, setRSocket, setChatMessages, hasMounted });
+  useSetupChatroom({ allChatrooms, user, currentChatroom, setCurrentChatroom, setAllChatrooms, rsocket, setRSocket, setChatMessages, hasMounted, setIsGptStreaming });
 
   const sendMessage = async (e: any) => {
     e.preventDefault();
@@ -37,6 +40,24 @@ const Chatroom = () => {
       console.error('RSocket connection is not established.');
       return;
     }
+
+    if (isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
+      console.log(isGptStreaming)
+      isGPTStreamingAlert();
+      return;
+    }
+
+    if (!isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
+      // rsocketGptRequestStream (
+      //   rsocket,
+      //   `chat.gptstream.${currentChatroom?.id}`,
+      //   setChatMessages,
+      //   setIsGptStreaming
+      //   );
+
+      setIsGptStreaming(true);
+    }
+
     const chatMessage: ChatMessage = {
       userId: user!.id!,
       textMessage: textForChatMessage,
@@ -44,6 +65,7 @@ const Chatroom = () => {
       createdDate: new Date(),
       lastModifiedDate: new Date()
     };
+
 
     await rsocketMessageChannel(
       rsocket!,
