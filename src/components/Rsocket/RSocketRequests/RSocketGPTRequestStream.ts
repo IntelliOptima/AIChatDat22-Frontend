@@ -8,8 +8,6 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-let lastPayload = "";
-
 export const rsocketGptRequestStream = async (
     rsocket: RSocket,
     route: string,
@@ -31,7 +29,6 @@ export const rsocketGptRequestStream = async (
                     
                     if (payload.data?.toString() === "Gpt Finished message") {
                         setIsGptStreaming(false);
-                        lastPayload = "";
                         return;
                     }
                     if (payload.data) {
@@ -49,6 +46,8 @@ export const rsocketGptRequestStream = async (
     });
 };
 
+
+let lastPayload = "";
 
 function updateChatMessage(newContent: string, route: string, setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>) {
     const chatroomId = route.split(".")[2];
