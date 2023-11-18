@@ -26,7 +26,6 @@ export const rsocketGptRequestStream = async (
                     console.log(`payload[data: ${payload.data}; metadata: ${payload.metadata}]|${isComplete}`);
 
                     if (payload.data) {
-                        await sleep(1000);
                         const newMessageContent = payload.data.toString();
                         updateChatMessage(newMessageContent, route, setChatMessages);
                     }
