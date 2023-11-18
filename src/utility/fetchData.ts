@@ -132,35 +132,29 @@ abstract class FetchData {
     }
   
     const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    const loopRunner = true;
   
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
   
-      const object = new TextDecoder().decode(value);
-      const objects = object.split("\n").filter(Boolean);
-
-      objects.forEach((line) => {
-        try {
-          const parsedRecord = JSON.parse(line) as T;
-          console.log("PARSED OBJECT:", parsedRecord);
-          setDataRecord((prevState) => {
-            // If the message is from GPT (userId = 1), append its text to the last GPT message
-            if (parsedRecord.userId === 1) {
-              let lastMessage = prevState[prevState.length - 1];
-              if (lastMessage && lastMessage.userId === 1) {
-                return prevState.slice(0, -1).concat({
-                  ...lastMessage,
-                  textMessage: lastMessage.textMessage + parsedRecord.textMessage
-                });
-              }
-            }
-            return [...prevState, parsedRecord];
-          });          
-        } catch (error) {
-          console.error("Error parsing JSON:", error);
+      const decodedChunk = decoder.decode(value, { stream: true });
+      const parsedRecord = JSON.parse(decodedChunk) as T;
+      console.log("PARSED OBJECT:", parsedRecord);
+      setDataRecord((prevState) => {
+        // If the message is from GPT (userId = 1), append its text to the last GPT message
+        if (parsedRecord.userId === 1) {
+          let lastMessage = prevState[prevState.length - 1];
+          if (lastMessage && lastMessage.userId === 1) {
+            return prevState.slice(0, -1).concat({
+              ...lastMessage,
+              textMessage: lastMessage.textMessage + parsedRecord.textMessage
+            });
+          }
         }
-      });
+        return [...prevState, parsedRecord];
+      });          
     }
   };
 }

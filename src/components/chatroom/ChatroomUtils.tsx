@@ -20,7 +20,7 @@ type setUpChatroomProps = {
   hasMounted: React.MutableRefObject<boolean>;
 }
 
-export const setUpChatroom = (
+export const useSetupChatroom = (
   {
     allChatrooms,
     user,
