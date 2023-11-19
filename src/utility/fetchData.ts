@@ -165,4 +165,3 @@ abstract class FetchData {
 
 
 export default FetchData;
-
