@@ -44,16 +44,16 @@ const Chatroom = () => {
       return;
     }
 
-    if (isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
-      console.log(isGptStreaming)
-      isGPTStreamingAlert();
-      return;
-    }
+    // if (isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
+    //   console.log(isGptStreaming)
+    //   isGPTStreamingAlert();
+    //   return;
+    // }
 
-    if (!isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
+    // if (!isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
 
-      setIsGptStreaming(true);
-    }
+    //   setIsGptStreaming(true);
+    // }
 
     const chatMessage: ChatMessage = {
       id: uuidv4(),
