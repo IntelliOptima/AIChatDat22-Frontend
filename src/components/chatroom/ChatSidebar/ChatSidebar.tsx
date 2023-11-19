@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import FetchData from '@/utility/fetchData';
 import { useUser } from '@/contexts/UserContext';
 import { useCurrentChatroom } from '@/contexts/ChatroomContext'
@@ -15,7 +15,7 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
   const router = useRouter();
   const { user } = useUser();
   const { currentChatroom ,allChatrooms } = useCurrentChatroom();
-  const { setCurrentChatroom } = useCurrentChatroom();
+  const { setAllChatrooms, setCurrentChatroom } = useCurrentChatroom();
   const [newChatroomName, setNewChatroomName] = useState<string>('');
   const [showChatroomNameInput, setShowChatroomNameInput] = useState<boolean>(false);
 
@@ -23,16 +23,15 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
   const handleCreateChatroom = async () => {
     const chatroomName = await ChatroomCreatorAlert();
     if (chatroomName) {
-      FetchData.postCreateChatroom(`${process.env.NEXT_PUBLIC_CREATE_NEW_CHATROOM}${user?.id}`, setCurrentChatroom, chatroomName)
-      .finally(() => {
-        router.refresh();
-      });
+      FetchData.postCreateChatroom(`${process.env.NEXT_PUBLIC_CREATE_NEW_CHATROOM}${user?.id}`, setAllChatrooms, chatroomName)
     }
   }
 
   const openChatroomNameInput = () => {
     setShowChatroomNameInput(!showChatroomNameInput);
   }
+
+
 
   return (
     <div
