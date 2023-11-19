@@ -76,7 +76,7 @@ abstract class FetchData {
     }
   };
 
-  static postCreateChatroom = async (url: string, setCurrentChatroom: Dispatch<SetStateAction<Chatroom | undefined>>, chatroomName: string) => {
+  static postCreateChatroom = async (url: string, setAllChatrooms: Dispatch<SetStateAction<Chatroom[]>>, chatroomName: string) => {
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -90,7 +90,13 @@ abstract class FetchData {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       console.log("RESPONSE: ", response);
-      setCurrentChatroom(await response.json() as Chatroom);
+ 
+      const newChatroom = await response.json() as Chatroom;
+
+      setAllChatrooms((prevState) => {
+        return prevState ? [...prevState, newChatroom] : [newChatroom];
+      });
+
     } catch (error) {
       console.error('Error:', error);
       throw error; // Rethrow the error for further handling if needed
@@ -165,4 +171,3 @@ abstract class FetchData {
 
 
 export default FetchData;
-

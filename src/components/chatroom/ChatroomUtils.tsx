@@ -33,11 +33,28 @@ export const useSetupChatroom = (
     setRSocket,
     setChatMessages,
     hasMounted,
-    setIsGptStreaming
-  
+    setIsGptStreaming,
   }: setUpChatroomProps
 
 ) => {
+  const closeRSocketConnection = () => {
+    if (rsocket) {
+      rsocket.close();
+      setRSocket(null);
+    }
+  };
+
+  const connectToRSocket = async () => {
+    try {
+      const connection = await getRSocketConnection();
+      setRSocket(connection);
+      hasMounted.current = true;
+    } catch (error) {
+      console.error("Failed to establish RSocket connection:", error);
+    }
+  };
+
+
   useEffect(() => {
     if (allChatrooms.length === 0) {
       FetchData.fetchDataAndSetListOfObjects(
@@ -50,7 +67,7 @@ export const useSetupChatroom = (
       setCurrentChatroom(JSON.parse(localStorage.getItem('currentChatroom')!));
     }
 
-  }, [allChatrooms, user]);
+  }, [allChatrooms.length, user]);
 
 
   useEffect(() => {
@@ -63,7 +80,7 @@ export const useSetupChatroom = (
         setChatMessages
       );
     }
-  }, [allChatrooms, currentChatroom]);
+  }, [currentChatroom?.id, allChatrooms.length]);
 
 
   useEffect(() => {
@@ -82,21 +99,16 @@ export const useSetupChatroom = (
     }
 
     if (rsocket && currentChatroom?.id !== undefined) {
-      rsocketRequestStream(
-        rsocket,
-        `chat.stream.${currentChatroom.id}`,
-        setChatMessages
-      );
-
       rsocketGptRequestStream(
         rsocket,
-        `chat.gptstream.${currentChatroom.id}`,
+        `chat.stream.${currentChatroom.id}`,
         setChatMessages,
-        setIsGptStreaming
+        setIsGptStreaming,
       );
     }
-    
-  }, [rsocket, currentChatroom]);
+
+  }, [rsocket, currentChatroom?.id]);
+
 }
 
 

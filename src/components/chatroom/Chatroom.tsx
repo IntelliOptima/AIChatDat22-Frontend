@@ -6,6 +6,7 @@ import { DisplayMessages } from "./DisplayMessages";
 
 import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSocketFireAndForgetMessage";
 import { RSocket } from "rsocket-core";
+import {v4 as uuidv4} from 'uuid';
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +15,7 @@ import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 import { handleAddUserToChatroom, useSetupChatroom } from "./ChatroomUtils";
 import { isGPTStreamingAlert } from "../SwalActions/IsGPTStreamingAlert";
 import { rsocketGptRequestStream } from "../Rsocket/RSocketRequests/RSocketGPTRequestStream";
+import { randomUUID } from "crypto";
 
 enum ChatRoomState {
   Default,
@@ -42,24 +44,19 @@ const Chatroom = () => {
       return;
     }
 
-    if (isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
-      console.log(isGptStreaming)
-      isGPTStreamingAlert();
-      return;
-    }
+    // if (isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
+    //   console.log(isGptStreaming)
+    //   isGPTStreamingAlert();
+    //   return;
+    // }
 
-    if (!isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
-      // rsocketGptRequestStream (
-      //   rsocket,
-      //   `chat.gptstream.${currentChatroom?.id}`,
-      //   setChatMessages,
-      //   setIsGptStreaming
-      //   );
+    // if (!isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
 
-      setIsGptStreaming(true);
-    }
+    //   setIsGptStreaming(true);
+    // }
 
     const chatMessage: ChatMessage = {
+      id: uuidv4(),
       userId: user!.id!,
       textMessage: textForChatMessage,
       chatroomId: currentChatroom?.id!,
