@@ -1,5 +1,5 @@
 export type ChatMessage = {
-    id?: number;
+    id?: string;
     userId: number;
     textMessage: string;
     chatroomId: string;

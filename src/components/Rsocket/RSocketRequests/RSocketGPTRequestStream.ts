@@ -11,7 +11,7 @@ export const rsocketGptRequestStream = async (
     rsocket: RSocket,
     route: string,
     setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>,
-    setIsGptStreaming: Dispatch<SetStateAction<boolean>>
+    setIsGptStreaming: Dispatch<SetStateAction<boolean>>,    
 ) => {
     return new Promise((resolve, reject) => {
         const connector = rsocket.requestStream(
@@ -31,11 +31,11 @@ export const rsocketGptRequestStream = async (
                     if (newMessage.textMessage === "Gpt Finished message") {
                         setIsGptStreaming(false);
                         return;
-                    }
+                    }                
 
-                    if (newMessage.userId === 1 && newMessage.textMessage !== "GPT Response Start") {
-                        console.log(`payload[Gpt message: ${newMessage.textMessage}; isComplete |${isComplete}`);
-                        updateChatMessage(newMessage, setChatMessages);
+                    if (newMessage.userId === 1) {
+                        console.log(`payload[Gpt message: ${newMessage.id}; isComplete |${isComplete}`);
+                        updateChatMessage(newMessage, setChatMessages);                        
 
                     } else {
                         setChatMessages((curr) => {
@@ -66,17 +66,15 @@ export const rsocketGptRequestStream = async (
 
 function updateChatMessage(newContent: ChatMessage, setChatMessages: Dispatch<SetStateAction<ChatMessage[]>>) {
     setChatMessages(currMessages => {
-        const existingMessageIndex = currMessages.findLastIndex(msg => 
-            msg.userId === newContent.userId && 
-            msg.chatroomId === newContent.chatroomId);
+        const existingMessageIndex = currMessages.findIndex(msg =>
+            msg.id === newContent.id);
 
         if (existingMessageIndex !== -1) {
-            // Update existing message
             const updatedMessages = [...currMessages];
-            updatedMessages[existingMessageIndex].textMessage = newContent.textMessage; // Replace with the new content
+            updatedMessages[existingMessageIndex] = { ...updatedMessages[existingMessageIndex], textMessage: newContent.textMessage };
             return updatedMessages;
         } else {
-            // Add new message if it doesn't exist
+            // Add new message if it doesn't exist            
             return [...currMessages, newContent];
         }
     });
