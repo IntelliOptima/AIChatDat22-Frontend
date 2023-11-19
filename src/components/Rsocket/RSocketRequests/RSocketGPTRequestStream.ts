@@ -33,7 +33,7 @@ export const rsocketGptRequestStream = async (
                         return;
                     }
 
-                    if (newMessage.userId === 1 && newMessage.textMessage !== "") {
+                    if (newMessage.userId === 1 && newMessage.textMessage !== "GPT Response Start") {
                         console.log(`payload[Gpt message: ${newMessage.textMessage}; isComplete |${isComplete}`);
                         updateChatMessage(newMessage, setChatMessages);
 
@@ -50,6 +50,7 @@ export const rsocketGptRequestStream = async (
                             }
                           });
                     }
+                    
                 },
                 onComplete: () => {                    
                     resolve(null)},
