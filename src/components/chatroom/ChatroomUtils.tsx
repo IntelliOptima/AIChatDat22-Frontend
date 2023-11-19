@@ -33,7 +33,7 @@ export const useSetupChatroom = (
     setRSocket,
     setChatMessages,
     hasMounted,
-    setIsGptStreaming
+    setIsGptStreaming,
   }: setUpChatroomProps
 
 ) => {
@@ -85,7 +85,7 @@ export const useSetupChatroom = (
         rsocket,
         `chat.stream.${currentChatroom.id}`,
         setChatMessages,
-        setIsGptStreaming,
+        setIsGptStreaming,        
       );
     }
     
