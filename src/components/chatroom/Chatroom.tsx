@@ -49,12 +49,6 @@ const Chatroom = () => {
     }
 
     if (!isGptStreaming && textForChatMessage.toLowerCase().startsWith("@gpt")) {
-      // rsocketGptRequestStream (
-      //   rsocket,
-      //   `chat.gptstream.${currentChatroom?.id}`,
-      //   setChatMessages,
-      //   setIsGptStreaming
-      //   );
 
       setIsGptStreaming(true);
     }

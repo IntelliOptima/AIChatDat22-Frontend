@@ -34,7 +34,6 @@ export const useSetupChatroom = (
     setChatMessages,
     hasMounted,
     setIsGptStreaming
-  
   }: setUpChatroomProps
 
 ) => {
@@ -82,17 +81,11 @@ export const useSetupChatroom = (
     }
 
     if (rsocket && currentChatroom?.id !== undefined) {
-      rsocketRequestStream(
-        rsocket,
-        `chat.stream.${currentChatroom.id}`,
-        setChatMessages
-      );
-
       rsocketGptRequestStream(
         rsocket,
-        `chat.gptstream.${currentChatroom.id}`,
+        `chat.stream.${currentChatroom.id}`,
         setChatMessages,
-        setIsGptStreaming
+        setIsGptStreaming,
       );
     }
     

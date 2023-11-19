@@ -23,8 +23,10 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
   const handleCreateChatroom = async () => {
     const chatroomName = await ChatroomCreatorAlert();
     if (chatroomName) {
-      FetchData.postCreateChatroom(`${process.env.NEXT_PUBLIC_CREATE_NEW_CHATROOM}${user?.id}`, setCurrentChatroom, chatroomName);
-      router.replace('/dashboard');
+      FetchData.postCreateChatroom(`${process.env.NEXT_PUBLIC_CREATE_NEW_CHATROOM}${user?.id}`, setCurrentChatroom, chatroomName)
+      .finally(() => {
+        router.refresh();
+      });
     }
   }
 

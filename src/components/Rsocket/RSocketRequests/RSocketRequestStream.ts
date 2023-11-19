@@ -33,6 +33,7 @@ export const rsocketRequestStream = async (
           const newMessage: ChatMessage = payload.data 
                 ? JSON.parse(payload.data.toString()) 
                 : undefined;
+                
           setChatMessages((curr) => {
             // Check if the new message is already in the array
             if (!curr.some((msg) => JSON.stringify(msg) === JSON.stringify(newMessage))) {
