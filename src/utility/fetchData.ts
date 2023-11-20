@@ -76,6 +76,33 @@ abstract class FetchData {
     }
   };
 
+  static deleteChatroom = async (url: string, chatroomId: string, updateChatroomList: Dispatch<SetStateAction<Chatroom[]>>) => {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: chatroomId
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      console.log("RESPONSE: ", response);
+  
+    
+      updateChatroomList((prevChatrooms) => {
+        return prevChatrooms ? prevChatrooms.filter(chatroom => chatroom.id !== chatroomId) : [];
+      });
+  
+    } catch (error) {
+      console.error('Error:', error);
+      throw error; // Rethrow the error for further handling if needed
+    }
+  };
+  
+
   static postCreateChatroom = async (url: string, setAllChatrooms: Dispatch<SetStateAction<Chatroom[]>>, chatroomName: string) => {
     try {
       const response = await fetch(url, {

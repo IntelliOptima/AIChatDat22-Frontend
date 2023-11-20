@@ -1,21 +1,20 @@
 "use client";
 
-import { getRSocketConnection } from "@/components/Rsocket/RSocketConnector";
 
 import { DisplayMessages } from "./DisplayMessages";
-
 import { rsocketMessageChannel } from "@/components/Rsocket/RSocketRequests/RSocketFireAndForgetMessage";
 import { RSocket } from "rsocket-core";
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ChatMessage } from "@/types/Message";
 import type { Chatroom } from "@/types/Chatroom";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useCurrentChatroom } from "@/contexts/ChatroomContext";
 import { handleAddUserToChatroom, useSetupChatroom } from "./ChatroomUtils";
-import { isGPTStreamingAlert } from "../SwalActions/IsGPTStreamingAlert";
-import { rsocketGptRequestStream } from "../Rsocket/RSocketRequests/RSocketGPTRequestStream";
-import { randomUUID } from "crypto";
+import Image from "next/image";
+import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
+
+
 
 enum ChatRoomState {
   Default,
@@ -90,11 +89,69 @@ const Chatroom = () => {
 
   return (
     <div className="flex justify-center content-center">
-      <div className="flex flex-col flex-1">
-        <div className="flex justify-center">
-          <div 
-          ref={chatWindowRef}
-          className="border border-gray-200 w-3/4 h-[700px] rounded-lg shadow-md text-black mt-6 mr-6 mb-4 bg-white p-6 overflow-y-auto">
+      <div className="flex flex-col justify-center flex-1">
+
+      <div className="flex w-5/6 justify-end">
+        <Popover placement="left-start" offset={10} showArrow>
+          <PopoverTrigger>
+            <Image
+              src="/images/group-chat.png"
+              width={45}
+              height={45}
+              alt="Group Chat Icon"
+              className="hover:scale-110 hover:cursor-pointer transition duration-200"
+            />
+          </PopoverTrigger>
+          <PopoverContent className="lg:w-[400px] md:w-[300px]">
+            <div className="bg-white border border-gray-300 rounded-lg w-full px-4 py-2">
+              <div className="">
+
+                <div className="flex items-center hover:cursor-pointer hover:scale-105 transition duration-200 my-2">
+                <Image
+                src="/images/add-user.png"
+                width={25}
+                height={25}
+                alt="Add User Icon"
+                className="mx-2"
+                />
+                <button className="text-[20px] my-2 hover:scale-105 transition duration-200" type="button" onClick={() => handleAddUserToChatroom(currentChatroom)} >Add to chatroom</button>
+                </div>
+
+                <div className="border border-gray-200 w-full my-2">{/* Gray Line in popover */}</div>
+
+                </div>
+              <div>
+                {currentChatroom?.users.map((user, id) => (
+                  user.id !== 1 && (
+                    <div key={id} className="flex items-center hover:cursor-pointer hover:scale-105 transition duration-200 my-4">
+                     
+                    <Image
+                      src={`${user.profileImage}`}
+                      width={30}
+                      height={30}
+                      alt="User Image"
+                      className="mx-2 rounded-full"
+                      />
+                    <p className="text-[18px]">{user.fullName}</p>
+                    </div>
+                   )))}
+                </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+        
+
+
+
+        </div>
+
+
+
+        <div className="flex flex-col items-center justify-center">
+
+          <div
+            ref={chatWindowRef}
+            className="border border-gray-200 w-3/4 h-[600px] rounded-lg shadow-md text-black mr-6 p-6 mb-4 bg-white overflow-y-auto">
             {chatMessages.length > 0 ? (
               <DisplayMessages chatMessages={chatMessages} />
             ) : (
@@ -129,11 +186,6 @@ const Chatroom = () => {
           </div>
         </form>
       </div>
-
-      <div className="flex-0 text-black">
-        <button type="button" onClick={() => handleAddUserToChatroom(currentChatroom)} >+ ADD FRIEND</button>
-      </div>
-
     </div>
   );
 };

@@ -23,7 +23,7 @@ const SigninButton = () => {
   return (
     <div className="flex gap-4 ml-auto items-center">
       <Image src={`${session.user.image}`} alt="User Image" className="rounded-full" width={32} height={32} />
-      <p className="text-sky-600">{session.user.name}</p>
+      <p>{user?.fullName}</p>
       <button onClick={() => signOut()} className="text-red-600">
         Sign Out
       </button>
