@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
 import PopoverSidebarContent from './PopoverSidebarContent';
 import { ChatroomDeleteAlert } from '@/components/SwalActions/ChatroomDeleteAlert';
+import { LeaveChatroomAlert } from '@/components/SwalActions/LeaveChatroomAlert';
 
 type ChatSidebarProps = {
   sidebarOpen: boolean;
@@ -31,8 +32,11 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
     }
   }
 
-  const handleLeaveClick = async (id: string) => {
-
+  const handleLeaveClick = async (userId: number, chatroomId: string) => {
+      LeaveChatroomAlert().then(() => {
+          FetchData.leaveChatroom(`${process.env.NEXT_PUBLIC_LEAVE_CHATROOM}${chatroomId}/${userId}`, currentChatroom?.id ?? "", setAllChatrooms)
+      }
+    )
   }
 
   const handleDeleteClick = async (id: string, chatroomName: string) => {
@@ -84,7 +88,7 @@ const ChatSidebar = ({ sidebarOpen }: ChatSidebarProps) => {
                       <div className="flex flex-col">
                         <PopoverSidebarContent textColor="black" imagePath="/images/document.png" contentTitle="Get a resumé" />
                         <PopoverSidebarContent textColor="black" imagePath="/images/settings.png" contentTitle="Settings" />
-                        <PopoverSidebarContent onClick={() => handleLeaveClick("user id")} textColor="black" imagePath="/images/leave.png" contentTitle="Leave Chatroom" />
+                        <PopoverSidebarContent onClick={() => handleLeaveClick(user?.id ?? 0, currentChatroom.id)} textColor="black" imagePath="/images/leave.png" contentTitle="Leave Chatroom" />
                         <PopoverSidebarContent onClick ={() => handleDeleteClick(currentChatroom.id, currentChatroom.chatroomName)} textColor="red-600" imagePath="/images/delete.png" contentTitle="Delete Chatroom" />
                       </div>
                    

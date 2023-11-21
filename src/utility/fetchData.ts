@@ -83,7 +83,31 @@ abstract class FetchData {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: chatroomId
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      console.log("RESPONSE: ", response);
+  
+    
+      updateChatroomList((prevChatrooms) => {
+        return prevChatrooms ? prevChatrooms.filter(chatroom => chatroom.id !== chatroomId) : [];
+      });
+  
+    } catch (error) {
+      console.error('Error:', error);
+      throw error; // Rethrow the error for further handling if needed
+    }
+  };
+
+  static leaveChatroom = async (url: string, chatroomId: string, updateChatroomList: Dispatch<SetStateAction<Chatroom[]>>) => {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
   
       if (!response.ok) {
