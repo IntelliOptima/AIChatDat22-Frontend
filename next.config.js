@@ -10,7 +10,14 @@ const nextConfig = {
           {
             protocol: 'https',
             hostname: 'th.bing.com'
-
+          },
+          {
+            protocol: 'https',
+            hostname: 'oaidalleapiprodscus.blob.core.windows.net'
+          },
+          {
+            protocol: 'https',
+            hostname: 'www.google.com'
           }
         ],
     },
