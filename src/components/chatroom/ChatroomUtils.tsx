@@ -37,22 +37,6 @@ export const useSetupChatroom = (
   }: setUpChatroomProps
 
 ) => {
-  const closeRSocketConnection = () => {
-    if (rsocket) {
-      rsocket.close();
-      setRSocket(null);
-    }
-  };
-
-  const connectToRSocket = async () => {
-    try {
-      const connection = await getRSocketConnection();
-      setRSocket(connection);
-      hasMounted.current = true;
-    } catch (error) {
-      console.error("Failed to establish RSocket connection:", error);
-    }
-  };
 
 
   useEffect(() => {

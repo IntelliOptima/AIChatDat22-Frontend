@@ -18,6 +18,6 @@ export default function DashboardLayout({
     <ChatLayout>
       {children}
     </ChatLayout>
-
+    
   )
 }
